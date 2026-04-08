@@ -2,7 +2,7 @@
 
 namespace RPGForum.Models
 {
-    public class Estatísticas
+    public class Estatisticas
     {
 
         public int Id { get; set; }
