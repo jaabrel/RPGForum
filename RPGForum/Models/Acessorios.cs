@@ -2,7 +2,7 @@
 
 namespace RPGForum.Models
 {
-    public class Acessórios
+    public class Acessorios
     {
         public int Id { get; set; }
 
