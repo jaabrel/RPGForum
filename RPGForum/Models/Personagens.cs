@@ -16,7 +16,7 @@ namespace RPGForum.Models
         [MaxLength(512)]
         public string? ImageUrl { get; set; }
 
-        public ICollection<Build> Builds { get; set; } = new List<Build>();
+        public ICollection<BuildPost> Builds { get; set; } = new List<BuildPost>();
 
     }
 }
