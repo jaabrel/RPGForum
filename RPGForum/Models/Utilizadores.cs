@@ -19,6 +19,9 @@ namespace RPGForum.Models
         [MaxLength(20)]
         public string Role {  get; set; } = "Registered";
 
+        /// <summary>
+        /// 
+        /// </summary>
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [StringLength(50)]

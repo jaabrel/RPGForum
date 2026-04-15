@@ -30,7 +30,7 @@ namespace RPGForum.Models
         public Personagens CharClass { get; set; } = null!;
         public Estatisticas Stats { get; set; }
 
-        public int UserId { get; set; }
+
 
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Like> Likes { get; set; } = new List<Like>();
