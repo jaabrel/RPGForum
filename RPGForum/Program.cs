@@ -7,8 +7,6 @@ using RPGForum.Services.Jwt;
 using RPGForum.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,48 +52,6 @@ builder.Services.AddAuthentication()
 builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddOpenApi(options =>
-{
-    // Info da API
-    options.AddDocumentTransformer((document, context, cancellationToken) =>
-    {
-        document.Info = new OpenApiInfo
-        {
-            Title = "Api RPGForum",
-            Version = "v1",
-            Description = "API para gestão de Utilizadores, Personagens e Builds"
-        };
-        return Task.CompletedTask;
-    });
-
-    // Configuração de Segurança (Bearer Token)
-    options.AddDocumentTransformer((document, context, cancellationToken) =>
-    {
-        var bearerScheme = new OpenApiSecurityScheme
-        {
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            Description = "Autenticação baseada em JWT Bearer. Coloca apenas o teu token."
-        };
-
-        document.AddComponent("Bearer", bearerScheme);
-        document.Security ??= new List<OpenApiSecurityRequirement>();
-
-        var securityRequirement = new OpenApiSecurityRequirement
-        {
-            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
-        };
-
-        document.Security.Add(securityRequirement);
-
-        return Task.CompletedTask;
-    });
-
-    // NOTA: O código IncludeXmlComments(xmlPath) foi removido intencionalmente!
-    // O .NET 10 já lê a documentação XML automaticamente, desde que esteja ativa no .csproj.
-});
 
 builder.Services.AddSignalR();
 
