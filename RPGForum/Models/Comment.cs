@@ -24,8 +24,5 @@ namespace RPGForum.Models
         public Utilizadores User { get; set; } = null!;
         public Comment? Parent { get; set; }
         public ICollection<Comment> Replies { get; set; } = new List<Comment>();
-
-
-
     }
 }

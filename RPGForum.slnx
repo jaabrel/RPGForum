@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="RPGForum/RPGForum.csproj" />
+  <Project Path="RPGForumApi/RPGForumApi.csproj" Id="be511515-abbd-4325-967a-fc37ddc9b1ee" />
 </Solution>

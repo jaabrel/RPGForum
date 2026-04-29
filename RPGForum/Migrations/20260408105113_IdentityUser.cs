@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace RPGForum.Data.Migrations
+namespace RPGForum.Migrations
 {
     /// <inheritdoc />
-    public partial class FirstMigration : Migration
+    public partial class IdentityUser : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

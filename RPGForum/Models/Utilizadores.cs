@@ -24,6 +24,9 @@ namespace RPGForum.Models
         /// </summary>
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [StringLength(50)]
+        public string? IdentityUserName { get; set;  }
+
         public ICollection<BuildPost> Builds { get; set; } = new List<BuildPost>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Like> Likes { get; set; } = new List<Like>();

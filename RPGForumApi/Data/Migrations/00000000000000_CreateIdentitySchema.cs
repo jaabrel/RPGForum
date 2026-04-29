@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
-namespace RPGForum.Data.Migrations
+namespace RPGForumApi.Data.Migrations
 {
     public partial class CreateIdentitySchema : Migration
     {
