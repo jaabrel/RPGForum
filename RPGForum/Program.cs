@@ -1,10 +1,15 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
-using RPGForum.Data;
 using System.Reflection;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using RPGForum.Data;
+using RPGForum.Services.Jwt;
+using RPGForum.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,19 +25,13 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("CanEditOwnProfile", policy =>
-        policy.RequireAuthenticatedUser());
-});
-
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(10);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-builder.Services.AddDistributedMemoryCache();
+
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
@@ -52,60 +51,57 @@ builder.Services.AddAuthentication()
         };
     });
 
-
+builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+
+builder.Services.AddOpenApi(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
+    // Info da API
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
     {
-        Title = "Api RPGForum",
-        Version = "v1",
-        Description = "API para gestão de Utilizadores, Personagens e Builds"
-    });
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
-                      Enter 'Bearer' [space] and then your token in the text input below.
-                      \r\n\r\nExample: 'Bearer 12345abcdef'",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    {
+        document.Info = new OpenApiInfo
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header,
-
-            },
-            new List<string>()
-        }
+            Title = "Api RPGForum",
+            Version = "v1",
+            Description = "API para gestão de Utilizadores, Personagens e Builds"
+        };
+        return Task.CompletedTask;
     });
 
-    // Caminho para o XML gerado
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    options.IncludeXmlComments(xmlPath);
+    // Configuração de Segurança (Bearer Token)
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        var bearerScheme = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "Autenticação baseada em JWT Bearer. Coloca apenas o teu token."
+        };
 
+        document.AddComponent("Bearer", bearerScheme);
+        document.Security ??= new List<OpenApiSecurityRequirement>();
+
+        var securityRequirement = new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+        };
+
+        document.Security.Add(securityRequirement);
+
+        return Task.CompletedTask;
+    });
+
+    // NOTA: O código IncludeXmlComments(xmlPath) foi removido intencionalmente!
+    // O .NET 10 já lê a documentação XML automaticamente, desde que esteja ativa no .csproj.
 });
 
 builder.Services.AddSignalR();
 
-builder.Services.AddDistributedMemoryCache();
-
 builder.Services.AddTransient<IEmailSender, RPGForum.Services.SmtpEmailSender>();
+
+builder.Services.AddDistributedMemoryCache();
 
 var app = builder.Build();
 
@@ -113,7 +109,6 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
-    app.UseSwagger();
     app.UseSwaggerUI();
 }
 else
@@ -126,7 +121,7 @@ else
 app.UseHttpsRedirection();
 
 app.UseRouting();
-
+app.UseSession();
 app.UseAuthorization();
 
 app.MapStaticAssets();
