@@ -1,0 +1,160 @@
+﻿@page "{id:int}"
+@model RPGForum.Pages.Builds.EditModel
+@{
+    ViewData["Title"] = "Editar Build";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="Index">As Minhas Builds</a></li>
+                <li class="breadcrumb-item active">Editar</li>
+            </ol>
+        </nav>
+
+        <h1 class="h2 mb-4">Editar Build</h1>
+
+        <form method="post" asp-route-id="@Model.Build.Id">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <!-- Informação principal -->
+            <div class="card mb-4">
+                <div class="card-header fw-semibold">Informação Principal</div>
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label asp-for="Build.Title" class="form-label">Título <span class="text-danger">*</span></label>
+                        <input asp-for="Build.Title" class="form-control" />
+                        <span asp-validation-for="Build.Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Build.Description" class="form-label">Descrição</label>
+                        <textarea asp-for="Build.Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Build.Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Build.CharacterId" class="form-label">Classe <span class="text-danger">*</span></label>
+                            <select asp-for="Build.CharacterId" asp-items="Model.PersonagensSelect" class="form-select">
+                                <option value="">-- Seleciona uma classe --</option>
+                            </select>
+                            <span asp-validation-for="Build.CharacterId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Build.Level" class="form-label">Nível (1-100)</label>
+                            <input asp-for="Build.Level" class="form-control" type="number" min="1" max="100" />
+                            <span asp-validation-for="Build.Level" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="card mb-4">
+                <div class="card-header fw-semibold">Estatísticas Base</div>
+                <div class="card-body">
+                    <div class="row row-cols-2 row-cols-md-3 g-3">
+                        <div>
+                            <label asp-for="Stats.Hp" class="form-label">HP</label>
+                            <input asp-for="Stats.Hp" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Strength" class="form-label">Força</label>
+                            <input asp-for="Stats.Strength" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Defense" class="form-label">Defesa</label>
+                            <input asp-for="Stats.Defense" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Magic" class="form-label">Magia</label>
+                            <input asp-for="Stats.Magic" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Endurance" class="form-label">Resistência</label>
+                            <input asp-for="Stats.Endurance" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Speed" class="form-label">Velocidade</label>
+                            <input asp-for="Stats.Speed" class="form-control" type="number" min="1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Armas -->
+            @if (Model.TodasArmas.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header fw-semibold">Armas</div>
+                    <div class="card-body">
+                        <div class="row row-cols-2 row-cols-md-3 g-2">
+                            @foreach (var arma in Model.TodasArmas)
+                            {
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="ArmasSelecionadas" value="@arma.Id"
+                                               class="form-check-input" id="arma_@arma.Id"
+                                        @(Model.ArmasSelecionadas.Contains(arma.Id) ? "checked" : "") />
+                                        <label class="form-check-label" for="arma_@arma.Id">
+                                            @arma.Name
+                                            @if (!string.IsNullOrEmpty(arma.Type))
+                                            {
+                                                <small class="text-muted"> (@arma.Type)</small>
+                                            }
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Acessórios -->
+            @if (Model.TodosAcessorios.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header fw-semibold">Acessórios</div>
+                    <div class="card-body">
+                        <div class="row row-cols-2 row-cols-md-3 g-2">
+                            @foreach (var acessorio in Model.TodosAcessorios)
+                            {
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="AcessoriosSelecionados" value="@acessorio.Id"
+                                               class="form-check-input" id="acess_@acessorio.Id"
+                                        @(Model.AcessoriosSelecionados.Contains(acessorio.Id) ? "checked" : "") />
+                                        <label class="form-check-label" for="acess_@acessorio.Id">
+                                            @acessorio.Name
+                                            @if (!string.IsNullOrEmpty(acessorio.Type))
+                                            {
+                                                <small class="text-muted"> (@acessorio.Type)</small>
+                                            }
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a asp-page="Index" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar Alterações</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

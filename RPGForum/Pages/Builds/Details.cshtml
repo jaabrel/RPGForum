@@ -1,4 +1,356 @@
-﻿@page
-@model MyApp.Namespace.DetailsModel
+﻿@page "{id:int}"
+@model RPGForum.Pages.Builds.DetailsModel
 @{
+    ViewData["Title"] = Model.Build.Title;
+    var build = Model.Build;
+    var utilizadorAtual = Model.UtilizadorAtual;
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="/FeedForum">Fórum</a></li>
+        <li class="breadcrumb-item active">@build.Title</li>
+    </ol>
+</nav>
+
+<!-- Cabeçalho -->
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h2 mb-1">@build.Title</h1>
+        <div class="d-flex flex-wrap gap-2 align-items-center text-muted small">
+            <span>por <strong>@build.User?.Username</strong></span>
+            <span>·</span>
+            <span class="badge bg-secondary">@build.CharClass?.Name</span>
+            <span class="badge bg-primary">Nível @build.Level</span>
+            <span>·</span>
+            <span>@build.CreatedAt.ToString("dd/MM/yyyy")</span>
+            @if (build.UpdatedAt != build.CreatedAt)
+            {
+                <span class="text-muted">(editado @build.UpdatedAt.ToString("dd/MM/yyyy"))</span>
+            }
+        </div>
+    </div>
+    @if (Model.IsAutor || User.IsInRole("Administrator"))
+    {
+        <div class="d-flex gap-2">
+            <a asp-page="Edit" asp-route-id="@build.Id" class="btn btn-outline-primary btn-sm">Editar</a>
+            <a asp-page="Delete" asp-route-id="@build.Id" class="btn btn-outline-danger btn-sm">Apagar</a>
+        </div>
+    }
+</div>
+
+<div class="row g-4">
+
+    <!-- ===== COLUNA PRINCIPAL ===== -->
+    <div class="col-lg-8">
+
+        <!-- Descrição -->
+        @if (!string.IsNullOrEmpty(build.Description))
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <p class="mb-0" style="white-space: pre-line">@build.Description</p>
+                </div>
+            </div>
+        }
+
+        <!-- Armas -->
+        @if (build.BuidWeapons.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header fw-semibold">⚔️ Armas</div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var bw in build.BuidWeapons)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@bw.Weapon?.Name</span>
+                            @if (!string.IsNullOrEmpty(bw.Weapon?.Type))
+                            {
+                                <span class="badge bg-light text-dark border">@bw.Weapon.Type</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <!-- Acessórios -->
+        @if (build.BuildAccessories.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header fw-semibold">💎 Acessórios</div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var ba in build.BuildAccessories.OrderBy(ba => ba.SlotPosition))
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@ba.Accessory?.Name</span>
+                            @if (!string.IsNullOrEmpty(ba.Accessory?.Type))
+                            {
+                                <span class="badge bg-light text-dark border">@ba.Accessory.Type</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <!-- ===== GOSTOS ===== -->
+        <div class="card mb-4" id="gostos">
+            <div class="card-body d-flex align-items-center gap-3 flex-wrap">
+                <span class="fs-5">
+                    ♥ <strong>@build.Likes.Count</strong>
+                    @(build.Likes.Count == 1 ? "gosto" : "gostos")
+                </span>
+
+                @if (User.Identity!.IsAuthenticated && utilizadorAtual != null)
+                {
+                    <form method="post" asp-page-handler="Gosto" asp-route-id="@build.Id">
+                        @if (Model.JaDeuGosto)
+                        {
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                ♥ Remover gosto
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                ♡ Dar gosto
+                            </button>
+                        }
+                    </form>
+                }
+                else if (!User.Identity!.IsAuthenticated)
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login"
+                       class="btn btn-outline-secondary btn-sm">
+                        Inicia sessão para gostar
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- ===== COMENTÁRIOS ===== -->
+        <div class="card" id="comentarios">
+            <div class="card-header fw-semibold">
+                💬 Comentários (@build.Comments.Count)
+            </div>
+            <div class="card-body">
+
+                @* Mensagens de validação do formulário *@
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                @* Formulário de novo comentário (raiz) *@
+                @if (User.Identity!.IsAuthenticated && utilizadorAtual != null)
+                {
+                    <form method="post" asp-page-handler="Comentar" asp-route-id="@build.Id"
+                          class="mb-4 pb-4 border-bottom">
+                        <input type="hidden" name="CommentParentId" value="" />
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold small">Novo comentário</label>
+                            <textarea name="Conteudo" class="form-control" rows="3"
+                                      placeholder="Escreve o teu comentário..."
+                                      maxlength="2000" required>@Model.Conteudo</textarea>
+                            <span asp-validation-for="Conteudo" class="text-danger small"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">Publicar</button>
+                    </form>
+                }
+                else if (!User.Identity!.IsAuthenticated)
+                {
+                    <p class="text-muted small mb-4">
+                        <a asp-area="Identity" asp-page="/Account/Login">Inicia sessão</a>
+                        para comentar.
+                    </p>
+                }
+
+                @* Lista de comentários *@
+                @{
+                    var comentariosRaiz = build.Comments
+                        .Where(c => c.ParentId == null)
+                        .OrderByDescending(c => c.CreatedAt)
+                        .ToList();
+                }
+
+                @if (!comentariosRaiz.Any())
+                {
+                    <p class="text-muted small mb-0">
+                        Ainda não há comentários. Sê o primeiro!
+                    </p>
+                }
+
+                @foreach (var comentario in comentariosRaiz)
+                {
+                    <div class="mb-3" id="comentario-@comentario.Id">
+                        <div class="border rounded p-3">
+
+                            <!-- Cabeçalho do comentário -->
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <strong class="small">@comentario.User?.Username</strong>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small class="text-muted">
+                                        @comentario.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                    @if (utilizadorAtual != null &&
+                                        (comentario.UserId == utilizadorAtual.Id || User.IsInRole("Administrator")))
+                                    {
+                                        <form method="post"
+                                              asp-page-handler="ApagarComentario"
+                                              asp-route-id="@build.Id"
+                                              asp-route-comentarioId="@comentario.Id"
+                                              onsubmit="return confirm('Apagar este comentário?')">
+                                            <button type="submit"
+                                                    class="btn btn-link btn-sm text-danger p-0"
+                                                    title="Apagar comentário">
+                                                ✕
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Conteúdo -->
+                            <p class="mb-3 small" style="white-space: pre-line">@comentario.Content</p>
+
+                            <!-- Respostas existentes -->
+                            @if (comentario.Replies.Any())
+                            {
+                                <div class="ms-3 ps-3 border-start mb-3">
+                                    @foreach (var resposta in comentario.Replies.OrderBy(r => r.CreatedAt))
+                                    {
+                                        <div class="mb-2" id="comentario-@resposta.Id">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <strong class="small">@resposta.User?.Username</strong>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <small class="text-muted">
+                                                        @resposta.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                                    </small>
+                                                    @if (utilizadorAtual != null &&
+                                                        (resposta.UserId == utilizadorAtual.Id || User.IsInRole("Administrator")))
+                                                    {
+                                                        <form method="post"
+                                                              asp-page-handler="ApagarComentario"
+                                                              asp-route-id="@build.Id"
+                                                              asp-route-comentarioId="@resposta.Id"
+                                                              onsubmit="return confirm('Apagar esta resposta?')">
+                                                            <button type="submit"
+                                                                    class="btn btn-link btn-sm text-danger p-0"
+                                                                    title="Apagar resposta">
+                                                                ✕
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <p class="mb-0 small" style="white-space: pre-line">@resposta.Content</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Formulário de resposta (colapsável) -->
+                            @if (User.Identity!.IsAuthenticated && utilizadorAtual != null)
+                            {
+                                <div>
+                                    <button class="btn btn-link btn-sm text-muted p-0 toggle-resposta"
+                                            data-target="resposta-@comentario.Id"
+                                            type="button">
+                                        ↩ Responder
+                                    </button>
+                                    <div id="resposta-@comentario.Id" class="mt-2" style="display:none">
+                                        <form method="post" asp-page-handler="Comentar"
+                                              asp-route-id="@build.Id">
+                                            <input type="hidden" name="CommentParentId"
+                                                   value="@comentario.Id" />
+                                            <div class="mb-2">
+                                                <textarea name="Conteudo" class="form-control form-control-sm"
+                                                          rows="2"
+                                                          placeholder="A tua resposta..."
+                                                          maxlength="2000" required></textarea>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button type="submit"
+                                                        class="btn btn-primary btn-sm">
+                                                    Responder
+                                                </button>
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary btn-sm toggle-resposta"
+                                                        data-target="resposta-@comentario.Id">
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== COLUNA LATERAL: ESTATÍSTICAS ===== -->
+    <div class="col-lg-4">
+        @if (build.Stats != null)
+        {
+            <div class="card sticky-top" style="top: 1rem;">
+                <div class="card-header fw-semibold">📊 Estatísticas</div>
+                <div class="card-body">
+                    @{
+                        var stats = new (string Nome, int Valor, string Cor)[]
+                        {
+                            ("HP",          build.Stats.Hp,         "danger"),
+                            ("Força",       build.Stats.Strength,   "warning"),
+                            ("Defesa",      build.Stats.Defense,    "info"),
+                            ("Magia",       build.Stats.Magic,      "primary"),
+                            ("Resistência", build.Stats.Endurance,  "secondary"),
+                            ("Velocidade",  build.Stats.Speed,      "success"),
+                        };
+                        int maxStat = stats.Max(s => s.Valor);
+                        if (maxStat == 0) maxStat = 1;
+                    }
+                    @foreach (var s in stats)
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>@s.Nome</span>
+                                <strong>@s.Valor</strong>
+                            </div>
+                            <div class="progress" style="height:6px">
+                                <div class="progress-bar bg-@s.Cor"
+                                     role="progressbar"
+                                     style="width:@(s.Valor * 100 / maxStat)%"
+                                     aria-valuenow="@s.Valor"
+                                     aria-valuemin="0"
+                                     aria-valuemax="@maxStat">
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Toggle dos formulários de resposta
+        document.querySelectorAll('.toggle-resposta').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = document.getElementById(btn.dataset.target);
+                if (target) {
+                    const isVisible = target.style.display !== 'none';
+                    target.style.display = isVisible ? 'none' : 'block';
+                    if (!isVisible) target.querySelector('textarea')?.focus();
+                }
+            });
+        });
+    </script>
 }

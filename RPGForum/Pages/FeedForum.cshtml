@@ -1,4 +1,101 @@
 ﻿@page
 @model RPGForum.Pages.FeedForumModel
 @{
+    ViewData["Title"] = "Fórum de Builds";
 }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Fórum de Builds</h1>
+    @if (User.Identity!.IsAuthenticated)
+    {
+        <a asp-page="/Builds/Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Nova Build
+        </a>
+    }
+</div>
+
+<!-- Filtros -->
+<form method="get" class="card card-body mb-4 bg-light border-0">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small text-muted mb-1">Pesquisar</label>
+            <input type="text" name="Pesquisa" value="@Model.Pesquisa"
+                   class="form-control" placeholder="Título ou descrição..." />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">Classe / Personagem</label>
+            <select name="PersonagemId" class="form-select">
+                <option value="">Todas as classes</option>
+                @foreach (var p in Model.Personagens)
+                {
+                    <option value="@p.Id" selected="@(Model.PersonagemId == p.Id)">@p.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">Ordenar por</label>
+            <select name="Ordenar" class="form-select">
+                <option value="recente" selected="@(Model.Ordenar == "recente")">Mais recentes</option>
+                <option value="popular" selected="@(Model.Ordenar == "popular")">Mais populares</option>
+                <option value="nivel" selected="@(Model.Ordenar == "nivel")">Nível mais alto</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">Filtrar</button>
+            <a asp-page="/FeedForum" class="btn btn-outline-secondary">↺</a>
+        </div>
+    </div>
+</form>
+
+<!-- Resultados -->
+@if (!Model.Builds.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <p class="fs-5">Nenhuma build encontrada.</p>
+        @if (User.Identity!.IsAuthenticated)
+        {
+            <a asp-page="/Builds/Create" class="btn btn-outline-primary">Criar a primeira build</a>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted small mb-3">@Model.Builds.Count resultado(s)</p>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var build in Model.Builds)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-secondary">@build.CharClass?.Name</span>
+                            <span class="badge bg-primary">Nível @build.Level</span>
+                        </div>
+                        <h5 class="card-title">
+                            <a asp-page="/Builds/Details" asp-route-id="@build.Id"
+                               class="text-decoration-none text-dark stretched-link">
+                                @build.Title
+                            </a>
+                        </h5>
+                        @if (!string.IsNullOrEmpty(build.Description))
+                        {
+                            <p class="card-text text-muted small">
+                                @(build.Description.Length > 100
+                                    ? build.Description[..100] + "…"
+                                    : build.Description)
+                            </p>
+                        }
+                    </div>
+                    <div class="card-footer bg-transparent border-0 d-flex justify-content-between align-items-center">
+                        <small class="text-muted">por <strong>@build.User?.Username</strong></small>
+                        <div class="d-flex gap-3 text-muted small">
+                            <span title="Gostos">♥ @build.Likes.Count</span>
+                            <span title="Comentários">💬 @build.Comments.Count</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+

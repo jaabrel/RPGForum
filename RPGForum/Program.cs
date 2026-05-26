@@ -30,6 +30,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddDistributedMemoryCache();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
@@ -57,8 +58,6 @@ builder.Services.AddSignalR();
 
 builder.Services.AddTransient<IEmailSender, RPGForum.Services.SmtpEmailSender>();
 
-builder.Services.AddDistributedMemoryCache();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -73,6 +72,8 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseStatusCodePagesWithRedirects("/Error/{0}");
 
 app.UseHttpsRedirection();
 

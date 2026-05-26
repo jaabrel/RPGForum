@@ -1,0 +1,50 @@
+@page
+@model RPGForum.Pages.PersonagensPages.CreateModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Personagens</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <span class="text-danger">*</span>
+                <label asp-for="Personagens.Name" class="control-label"></label>
+                <input asp-for="Personagens.Name" class="form-control" aria-required="true"/>
+                <span asp-validation-for="Personagens.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Personagens.Description" class="control-label"></label>
+                <input asp-for="Personagens.Description" class="form-control" />
+                <span asp-validation-for="Personagens.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Personagens.ImageUrl" class="control-label"></label>
+                <input asp-for="Personagens.ImageUrl" class="form-control" />
+                <span asp-validation-for="Personagens.ImageUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Personagens.Builds" class="control-label"></label>
+                <input asp-for="Personagens.Builds" class="form-control" />
+                <span asp-validation-for="Personagens.Builds" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

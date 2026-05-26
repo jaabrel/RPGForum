@@ -1,0 +1,74 @@
+﻿@page
+@model RPGForum.Pages.Builds.IndexModel
+@{
+    ViewData["Title"] = "As minhas Builds";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">As Minhas Builds</h1>
+    <a asp-page="Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Nova Build
+    </a>
+</div>
+
+@if (Model.MensagemSucesso != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @Model.MensagemSucesso
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.Builds.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <p class="fs-5">Ainda não tens builds criadas.</p>
+        <a asp-page="Create" class="btn btn-outline-primary">Criar a primeira build</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Título</th>
+                    <th>Classe</th>
+                    <th>Nível</th>
+                    <th>Gostos</th>
+                    <th>Comentários</th>
+                    <th>Atualizado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var build in Model.Builds)
+                {
+                    <tr>
+                        <td>
+                            <a asp-page="Details" asp-route-id="@build.Id" class="fw-semibold text-decoration-none">
+                                @build.Title
+                            </a>
+                        </td>
+                        <td><span class="badge bg-secondary">@build.CharClass?.Name</span></td>
+                        <td>@build.Level</td>
+                        <td>♥ @build.Likes.Count</td>
+                        <td>💬 @build.Comments.Count</td>
+                        <td><small class="text-muted">@build.UpdatedAt.ToString("dd/MM/yyyy")</small></td>
+                        <td>
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a asp-page="Details" asp-route-id="@build.Id"
+                                   class="btn btn-sm btn-outline-secondary">Ver</a>
+                                <a asp-page="Edit" asp-route-id="@build.Id"
+                                   class="btn btn-sm btn-outline-primary">Editar</a>
+                                <a asp-page="Delete" asp-route-id="@build.Id"
+                                   class="btn btn-sm btn-outline-danger">Apagar</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
