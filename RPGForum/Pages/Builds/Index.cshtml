@@ -4,71 +4,59 @@
     ViewData["Title"] = "As minhas Builds";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2 mb-0">As Minhas Builds</h1>
-    <a asp-page="Create" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i> Nova Build
-    </a>
+<div class="container py-5">
+    <div class="text-center py-5 mb-5 position-relative">
+        <div class="mb-3 d-inline-block px-3 py-1 glass-card" style="font-size: 0.85rem; color: var(--accent-secondary); border-color: rgba(6, 182, 212, 0.3);">
+            ✨  Bem Vindo ao RPG Forum ✨
+        </div>
+        <h1 class="display-3 fw-black title mb-3"> ⚔️ RPGFORUM</h1>
+        <p class="lead text-muted mx-auto mb-4" style="max-width: 650px; font-size: 1.15rem; line-height: 1.6;">
+            Aqui podes criar, partilhar e analisar <strong class="text-white">Builds de vários personagens</strong>. É aqui que descobrir como otimizares o teu personagem para teres uma Build mais eficaz!
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a asp-page"/ForumFeed" class="btn-primary d-flex align-items-center gap-2">
+                🔮 Explorar Fórum
+            </a>
+            @if (User.Identity!.IsAuthenticated)
+            {
+                <a asp-page="/Builds/Create" class="btn btn-secondary">
+                 🛡️Criar Nova Build
+                </a>
+            }
+            else
+            {
+                <a href="/Identity/Account/Register" class="btn btn-secondary">
+                    📜 Registar Utilizador
+                </a>
+            }
+        </div>
+    </div>
+
+
+    <div class="col-lg-5">
+        <div class="card glass-card h-100 p-4 position-relative overflow-hidden" style="border-color: rgba(245, 158, 11, 0.15);">
+            <div class="position-absolute" style="top: 0; right: 0; width: 80px; height: 80px; background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);"></div>
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="p-3 rounded-3" style="background: rgba(245, 158, 11, 0.1);">
+                    <span style="font-size: 1.8rem;">👑</span>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0" style="color: var(--accent-warning);">Acesso de Demonstração</h4>
+                    <small class="text-muted">Credendiais de Administrador</small>
+                </div>
+            </div>
+            <p class="text-muted mb-4" style="font-size: 0.95rem;">Utilize os seguintes dados de teste para aceder à área de administração onde poderá gerir classes, armas e acessórios:
+            </p>
+
+        </div>
+    </div>
+
+
+
+
+
 </div>
 
-@if (Model.MensagemSucesso != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @Model.MensagemSucesso
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-@if (!Model.Builds.Any())
-{
-    <div class="text-center py-5 text-muted">
-        <p class="fs-5">Ainda não tens builds criadas.</p>
-        <a asp-page="Create" class="btn btn-outline-primary">Criar a primeira build</a>
-    </div>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Título</th>
-                    <th>Classe</th>
-                    <th>Nível</th>
-                    <th>Gostos</th>
-                    <th>Comentários</th>
-                    <th>Atualizado</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var build in Model.Builds)
-                {
-                    <tr>
-                        <td>
-                            <a asp-page="Details" asp-route-id="@build.Id" class="fw-semibold text-decoration-none">
-                                @build.Title
-                            </a>
-                        </td>
-                        <td><span class="badge bg-secondary">@build.CharClass?.Name</span></td>
-                        <td>@build.Level</td>
-                        <td>♥ @build.Likes.Count</td>
-                        <td>💬 @build.Comments.Count</td>
-                        <td><small class="text-muted">@build.UpdatedAt.ToString("dd/MM/yyyy")</small></td>
-                        <td>
-                            <div class="d-flex gap-2 justify-content-end">
-                                <a asp-page="Details" asp-route-id="@build.Id"
-                                   class="btn btn-sm btn-outline-secondary">Ver</a>
-                                <a asp-page="Edit" asp-route-id="@build.Id"
-                                   class="btn btn-sm btn-outline-primary">Editar</a>
-                                <a asp-page="Delete" asp-route-id="@build.Id"
-                                   class="btn btn-sm btn-outline-danger">Apagar</a>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
 }
 

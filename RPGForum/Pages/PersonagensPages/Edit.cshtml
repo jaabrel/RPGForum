@@ -13,27 +13,27 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Personagens.Id" />
+            <input type="hidden" asp-for="Personagem.Id" />
             <div class="form-group">
                 <span class="text-danger">*</span>
-                <label asp-for="Personagens.Name" class="control-label"></label>
-                <input asp-for="Personagens.Name" class="form-control" aria-required="true"/>
-                <span asp-validation-for="Personagens.Name" class="text-danger"></span>
+                <label asp-for="Personagem.Name" class="control-label"></label>
+                <input asp-for="Personagem.Name" class="form-control" aria-required="true"/>
+                <span asp-validation-for="Personagem.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Personagens.Description" class="control-label"></label>
-                <input asp-for="Personagens.Description" class="form-control" />
-                <span asp-validation-for="Personagens.Description" class="text-danger"></span>
+                <label asp-for="Personagem.Description" class="control-label"></label>
+                <input asp-for="Personagem.Description" class="form-control" />
+                <span asp-validation-for="Personagem.Description" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Personagens.ImageUrl" class="control-label"></label>
-                <input asp-for="Personagens.ImageUrl" class="form-control" />
-                <span asp-validation-for="Personagens.ImageUrl" class="text-danger"></span>
+                <label asp-for="Personagem.ImageUrl" class="control-label"></label>
+                <input asp-for="Personagem.ImageUrl" class="form-control" />
+                <span asp-validation-for="Personagem.ImageUrl" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Personagens.Builds" class="control-label"></label>
-                <input asp-for="Personagens.Builds" class="form-control" />
-                <span asp-validation-for="Personagens.Builds" class="text-danger"></span>
+                <label asp-for="Personagem.Builds" class="control-label"></label>
+                <input asp-for="Personagem.Builds" class="form-control" />
+                <span asp-validation-for="Personagem.Builds" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
