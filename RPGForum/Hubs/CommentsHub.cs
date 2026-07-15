@@ -8,7 +8,7 @@ namespace RPGForum.Hubs
 
         public async Task JoinBuildGroup( int buildId)
         {
-            await Groups.AddToGroutpAsync(ContextBoundObject.ConnectionId, $"build-{buildId}");
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"build-{buildId}");
         }
 
         public async Task LeaveBuildGroup(int buildId)

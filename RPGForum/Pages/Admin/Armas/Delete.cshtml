@@ -1,0 +1,47 @@
+@page
+@model RPGForum.Pages.Admin.Armas.DeleteModel
+@{
+    ViewData["Title"] = "Eliminar Arma";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0 h5">⚠️ Confirmar Eliminação</h3>
+                </div>
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <p class="fs-5">Tem a certeza de que deseja eliminar esta arma?</p>
+                    
+                    <div class="bg-light p-3 rounded mb-4">
+                        <p class="mb-1"><strong>Nome:</strong> @Model.Arma.Name</p>
+                        <p class="mb-1"><strong>Tipo:</strong> @Model.Arma.Type</p>
+                        <p class="mb-0 text-muted"><strong>Descrição:</strong> @Model.Arma.Description</p>
+                    </div>
+
+                    @if (Model.BuildsCount > 0)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Aviso:</strong> Esta arma está associada a <strong>@Model.BuildsCount</strong> build(s).
+                            A eliminação está bloqueada por segurança.
+                        </div>
+                    }
+
+                    <form method="post">
+                        <input type="hidden" asp-for="Arma.Id" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-page="./Index" class="btn btn-outline-secondary">Voltar para a Lista</a>
+                            <button type="submit" class="btn btn-danger" @(Model.BuildsCount > 0 ? "disabled" : "")>
+                                Eliminar Permanentemente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using RPGForum.Models;
+using RPGForumApi.Models;
 
 namespace RPGForumApi.Data
 {
@@ -23,9 +23,14 @@ namespace RPGForumApi.Data
             base.OnModelCreating(builder);
 
             builder.Entity<IdentityRole>().HasData(
-                new IdentityRole { Id = "a", Name = "Administrator", NormalizedName = "ADMINISTRADOR" });
+                new IdentityRole 
+                { 
+                    Id = "a", 
+                    Name = "Administrator", 
+                    NormalizedName = "ADMINISTRADOR",
+                    ConcurrencyStamp = "991937ec-0e3f-45a7-adc0-6097a2c7f2bc" 
+                });
 
-            var hasher = new PasswordHasher<IdentityUser>();
             builder.Entity<IdentityUser>().HasData(
                 new IdentityUser
                 {
@@ -37,12 +42,26 @@ namespace RPGForumApi.Data
                     EmailConfirmed = true,
                     SecurityStamp = "1bcbd0a7-5c9d-4510-811a-cd5eee6c0dbe",
                     ConcurrencyStamp = "fe626d10-17f8-4768-8818-895627758300",
-                    PasswordHash = hasher.HashPassword(null, "Aa0_aa")
+                    PasswordHash = "AQAAAAEAACcQAAAAEHX9OhBfKGUsbLTayhBCZ3WRcp+X+ivBA00sBQI5YG2NPaVbTJsVKE9jOgm/4Sb2RQ=="
                 }
             );
 
             builder.Entity<IdentityUserRole<string>>().HasData(
                 new IdentityUserRole<string> { UserId = "admin", RoleId = "a" });
+
+            // Semeia o utilizador correspondente na tabela Utilizadores
+            builder.Entity<Utilizadores>().HasData(
+                new Utilizadores
+                {
+                    Id = 1,
+                    Username = "admin",
+                    Email = "admin@mail.pt",
+                    Password = "",
+                    Role = "Administrator",
+                    IdentityUserName = "admin@mail.pt",
+                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                }
+            );
 
             builder.Entity<BuildWeapon>()
                 .HasKey(bw => new { bw.BuildId, bw.WeaponId });

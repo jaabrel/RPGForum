@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RPGForum.Models
 {
-    public class Utilizadores
+    public class Utilizadores : IdentityUser
     {
         public int Id { get; set; }
 
@@ -20,12 +21,13 @@ namespace RPGForum.Models
         public string Role {  get; set; } = "Registered";
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+
         [StringLength(50)]
-        public string? IdentityUserName { get; set;  }
+        public string? UserId { get; set;  }
 
         public ICollection<BuildPost> Builds { get; set; } = new List<BuildPost>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();

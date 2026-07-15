@@ -34,6 +34,7 @@ namespace RPGForum.Pages.Builds
             Builds = await _context.Builds
                 .Where(b => b.UtilizadorID == utilizador.Id)
                 .Include(b => b.CharClass)
+                .Include(b => b.Stats) // ADICIONADO: Inclui estatísticas na lista
                 .Include(b => b.Likes)
                 .Include(b => b.Comments)
                 .OrderByDescending(b => b.UpdatedAt)
@@ -70,6 +71,5 @@ namespace RPGForum.Pages.Builds
 
             return utilizador;
         }
-
     }
 }

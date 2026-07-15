@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -47,7 +47,7 @@ namespace RPGForumApi.Controllers
         /// Criar um novo acessório (requer autorização de Administrador)
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrator")]
         public async Task<ActionResult<Acessorios>> PostAcessorio(Acessorios acessorio)
         {
             if (!ModelState.IsValid)
@@ -57,7 +57,7 @@ namespace RPGForumApi.Controllers
             _context.Acessorios.Add(acessorio);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAcessorio", new { id = acessorio:ID }, acessorio);
+            return CreatedAtAction("GetAcessorio", new { id = acessorio.Id }, acessorio);
         }
 
         /// <summary>
@@ -128,7 +128,5 @@ namespace RPGForumApi.Controllers
         {
             return _context.Acessorios.Any(e => e.Id == id);
         }
-
-
     }
 }

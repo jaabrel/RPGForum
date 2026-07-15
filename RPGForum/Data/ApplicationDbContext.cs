@@ -24,7 +24,11 @@ namespace RPGForum.Data
             base.OnModelCreating(builder);
 
             builder.Entity<IdentityRole>().HasData(
-                new IdentityRole { Id = "a", Name = "Administrator", NormalizedName = "ADMINISTRADOR" });
+                new IdentityRole { Id = "a",
+                    Name = "Administrator",
+                    NormalizedName = "ADMINISTRADOR",
+                    ConcurrencyStamp = "991937ec-0e3f-45a7-adc0-6097a2c7f2bc"
+                });
 
             var hasher = new PasswordHasher<IdentityUser>();
             builder.Entity<IdentityUser>().HasData(
@@ -38,7 +42,7 @@ namespace RPGForum.Data
                     EmailConfirmed = true,
                     SecurityStamp = "1bcbd0a7-5c9d-4510-811a-cd5eee6c0dbe",
                     ConcurrencyStamp = "fe626d10-17f8-4768-8818-895627758300",
-                    PasswordHash = hasher.HashPassword(null, "Aa0_aa")
+                    PasswordHash = "AQAAAAEAACcQAAAAEHX9OhBfKGUsbLTayhBCZ3WRcp+X+ivBA00sBQI5YG2NPaVbTJsVKE9jOgm/4Sb2RQ=="
                 }
             );
 
@@ -83,9 +87,9 @@ namespace RPGForum.Data
                 .WithMany(u => u.Likes)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
+
         }
-    
-        
+
+
     }
 }

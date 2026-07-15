@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -6,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Models;
 using System.ComponentModel.DataAnnotations;
-
 
 namespace RPGForum.Pages.Builds
 {
@@ -49,7 +47,7 @@ namespace RPGForum.Pages.Builds
         }
 
         // --- POST: Dar / Retirar Gosto ---
-        [Authorize]
+        // Removido [Authorize] do handler (Aviso MVC1001 resolvido). A segurança é validada imperativamente.
         public async Task<IActionResult> OnPostGostoAsync(int id)
         {
             var utilizador = await ObterUtilizadorAtualAsync();
@@ -80,12 +78,12 @@ namespace RPGForum.Pages.Builds
 
             await _context.SaveChangesAsync();
 
-            // Redirecionar de volta para os detalhes (âncora para os gostos)
+            // Redirecionar de volta para os detalhes
             return RedirectToPage(new { id });
         }
 
         // --- POST: Comentar (novo ou resposta) ---
-        [Authorize]
+        // Removido [Authorize] do handler (Aviso MVC1001 resolvido). A segurança é validada imperativamente.
         public async Task<IActionResult> OnPostComentarAsync(int id)
         {
             var utilizador = await ObterUtilizadorAtualAsync();
@@ -130,7 +128,7 @@ namespace RPGForum.Pages.Builds
         }
 
         // --- POST: Apagar Comentário ---
-        [Authorize]
+        // Removido [Authorize] do handler (Aviso MVC1001 resolvido). A segurança é validada imperativamente.
         public async Task<IActionResult> OnPostApagarComentarioAsync(int id, int comentarioId)
         {
             var utilizador = await ObterUtilizadorAtualAsync();
@@ -148,14 +146,11 @@ namespace RPGForum.Pages.Builds
             _context.Comentario.Remove(comentario);
             await _context.SaveChangesAsync();
 
-            return RedirectToPage(pageName: null, pageHandler: null,new { id }, fragment: "comentarios");
+            return RedirectToPage(pageName: null, pageHandler: null, new { id }, fragment: "comentarios");
         }
 
         // --- Helpers privados ---
 
-        /// <summary>
-        /// Carrega a build com todos os dados necessários para a página de detalhes.
-        /// </summary>
         private async Task<BuildPost?> CarregarBuildAsync(int id)
         {
             return await _context.Builds
@@ -175,9 +170,6 @@ namespace RPGForum.Pages.Builds
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
-        /// <summary>
-        /// Preenche IsAutor, JaDeuGosto e UtilizadorAtual para o utilizador autenticado.
-        /// </summary>
         private async Task PreencherDadosUtilizadorAsync()
         {
             if (!User.Identity!.IsAuthenticated) return;
@@ -189,9 +181,6 @@ namespace RPGForum.Pages.Builds
             JaDeuGosto = Build.Likes.Any(l => l.UserId == UtilizadorAtual.Id);
         }
 
-        /// <summary>
-        /// Obtém o registo Utilizadores do utilizador Identity atual.
-        /// </summary>
         private async Task<Utilizadores?> ObterUtilizadorAtualAsync()
         {
             var identityUser = await _userManager.GetUserAsync(User);
@@ -201,6 +190,4 @@ namespace RPGForum.Pages.Builds
                 .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
         }
     }
-
-
 }

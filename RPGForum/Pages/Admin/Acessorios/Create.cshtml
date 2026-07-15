@@ -1,0 +1,56 @@
+﻿@page
+@model RPGForum.Pages.Admin.Acessorios.CreateModel
+
+@{
+    ViewData["Title"] = "Criar Acessório";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0 h5"> Criar Novo Acessório</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Acessorio.Name" class="form-label fw-bold">Nome do Acessório</label>
+                            <input asp-for="Acessorio.Name" class="form-control" placeholder="Ex: Anel de Mana, Amuleto de Vida..." />
+                            <span asp-validation-for="Acessorio.Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Acessorio.Type" class="form-label fw-bold">Tipo de Acessório</label>
+                            <input asp-for="Acessorio.Type" class="form-control" placeholder="Ex: Anel, Colar, Amuleto, Cinto..." />
+                            <span asp-validation-for="Acessorio.Type" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Acessorio.Description" class="form-label fw-bold">Descrição</label>
+                            <textarea asp-for="Acessorio.Description" class="form-control" rows="4" placeholder="Descreva os bónus e efeitos deste acessório..."></textarea>
+                            <span asp-validation-for="Acessorio.Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Acessorio.ImageUrl" class="form-label fw-bold">URL da Imagem</label>
+                            <input asp-for="Acessorio.ImageUrl" class="form-control" placeholder="https://exemplo.com/acessorio.png" />
+                            <span asp-validation-for="Acessorio.ImageUrl" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-page="./Index" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Criar Acessório</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

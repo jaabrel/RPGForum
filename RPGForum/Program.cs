@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Services.Jwt;
 using RPGForum.Models;
+using RPGForum.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -33,7 +34,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddDistributedMemoryCache();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "chave-super-secreta-mesmo-chave-super-secreta-mesmo-chave-super-secreta-mesmo-chave-super-secreta-mesmo");
+
 
 builder.Services.AddAuthentication()
     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
@@ -44,11 +46,12 @@ builder.Services.AddAuthentication()
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
+            ValidIssuer = jwtSettings["Issuer"] ?? "RPGForum",
+            ValidAudience = jwtSettings["Audience"] ?? "Os usuários do RPGForum",
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
+
 
 builder.Services.AddSingleton<TokenService>();
 
@@ -84,5 +87,7 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.MapHub<CommentsHub>("/commentsHub");
 
 app.Run();
