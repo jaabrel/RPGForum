@@ -9,6 +9,7 @@ using RPGForum.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,10 +20,24 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new AuthorizationPolicyBuilder(
+        JwtBearerDefaults.AuthenticationScheme,
+        IdentityConstants.ApplicationScheme)
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 builder.Services.AddSession(options =>
 {
@@ -53,7 +68,7 @@ builder.Services.AddAuthentication()
     });
 
 
-builder.Services.AddSingleton<TokenService>();
+builder.Services.AddScoped<TokenService>();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -82,11 +97,14 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.MapControllers();
 
 app.MapHub<CommentsHub>("/commentsHub");
 

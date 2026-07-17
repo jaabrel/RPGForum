@@ -129,7 +129,7 @@ namespace RPGForum.Controllers
             }
 
             var utilizador = await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.UserId == identityUser.UserName);
+                .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
 
             if (utilizador == null)
             {

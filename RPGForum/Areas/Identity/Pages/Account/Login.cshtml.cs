@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
@@ -60,27 +60,16 @@ namespace RPGForum.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
+            [Required(ErrorMessage = "O email ou nome de utilizador é obrigatório")]
+            [Display(Name = "Email")]
+            public string Email { get; set; } = string.Empty;
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
+            [Required(ErrorMessage = "A palavra-passe é obrigatória")]
             [DataType(DataType.Password)]
-            public string Password { get; set; }
+            [Display(Name = "Palavra-passe")]
+            public string Password { get; set; } = string.Empty;
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Display(Name = "Remember me?")]
+            [Display(Name = "Lembrar-me neste dispositivo")]
             public bool RememberMe { get; set; }
         }
 

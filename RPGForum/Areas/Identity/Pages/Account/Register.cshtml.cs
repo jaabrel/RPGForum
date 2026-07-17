@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
@@ -75,35 +75,26 @@ namespace RPGForum.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "O nome de utilizador é obrigatório")]
+            [StringLength(30, ErrorMessage = "O nome de utilizador deve ter entre {2} e {1} caracteres.", MinimumLength = 3)]
+            [Display(Name = "Nome de Utilizador")]
+            public string Username { get; set; } = string.Empty;
+
+            [Required(ErrorMessage = "O email é obrigatório")]
+            [EmailAddress(ErrorMessage = "Formato de email inválido")]
             [Display(Name = "Email")]
-            public string Email { get; set; }
+            public string Email { get; set; } = string.Empty;
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "A senha é obrigatória")]
+            [StringLength(100, ErrorMessage = "A senha deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
-            public string Password { get; set; }
+            [Display(Name = "Senha")]
+            public string Password { get; set; } = string.Empty;
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
-
-            public Utilizadores UserDetails { get; set; }
+            [Display(Name = "Confirmar Senha")]
+            [Compare("Password", ErrorMessage = "A senha e a confirmação de senha não coincidem.")]
+            public string ConfirmPassword { get; set; } = string.Empty;
         }
 
 
@@ -129,22 +120,33 @@ namespace RPGForum.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
+                    var utilizador = new Utilizadores
+                    {
+                        Username = Input.Username,
+                        Email = Input.Email,
+                        Password = "",
+                        Role = "Registered",
+                        CreatedAt = DateTime.UtcNow,
+                        IdentityUserName = Input.Email
+                    };
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                    Input.UserDetails.UserId = Input.Email;
+                    _context.Utilizadores.Add(utilizador);
+                    await _context.SaveChangesAsync();
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
+                        var userId = await _userManager.GetUserIdAsync(user);
+                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        var callbackUrl = Url.Page(
+                            "/Account/ConfirmEmail",
+                            pageHandler: null,
+                            values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                            protocol: Request.Scheme);
+
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
                         return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                     }
                     else
@@ -155,7 +157,18 @@ namespace RPGForum.Areas.Identity.Pages.Account
                 }
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    var description = error.Code switch
+                    {
+                        "PasswordRequiresNonAlphanumeric" => "A palavra-passe deve conter pelo menos um caráter especial (ex: !, @, #, etc.).",
+                        "PasswordRequiresDigit" => "A palavra-passe deve conter pelo menos um número ('0'-'9').",
+                        "PasswordRequiresLower" => "A palavra-passe deve conter pelo menos uma letra minúscula ('a'-'z').",
+                        "PasswordRequiresUpper" => "A palavra-passe deve conter pelo menos uma letra maiúscula ('A'-'Z').",
+                        "PasswordTooShort" => "A palavra-passe deve ter pelo menos 6 caracteres.",
+                        "DuplicateUserName" => "Este nome de utilizador ou email já está em uso.",
+                        "DuplicateEmail" => "Este endereço de email já está em uso.",
+                        _ => error.Description
+                    };
+                    ModelState.AddModelError(string.Empty, description);
                 }
             }
 

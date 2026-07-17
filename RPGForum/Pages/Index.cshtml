@@ -1,42 +1,95 @@
-﻿@page
+@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Sobre";
+    ViewData["Title"] = "Bem-vindo ao RPGForum!";
 }
 
-<div class="container mt-5">
-    <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold text-primary">⚔️ RPGForum</h1>
-        <p class="lead">A sua plataforma para partilha e descoberta de builds de RPG.</p>
+<div class="container py-4">
+    <!-- Hero Section -->
+    <div class="text-center py-5 px-3 mb-5 glass-card position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(99,102,241,0.05) 100%);">
+        <div class="position-relative z-index-1">
+            <h1 class="display-3 fw-black mb-3 title" style="font-size: clamp(2.5rem, 6vw, 4.5rem);">⚔️ RPGForum</h1>
+            <p class="lead fs-4 text-muted max-w-2xl mx-auto mb-4" style="max-width: 600px; margin: 0 auto;">
+                A arena definitiva para partilhares as tuas builds mais insanas, debateres estratégias e encontrares o setup perfeito para o teu herói!
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a asp-page="/FeedForum" class="btn btn-lg btn-primary shadow-sm px-4">
+                    🎮 Entrar no Fórum
+                </a>
+                @if (!User.Identity!.IsAuthenticated)
+                {
+                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-lg btn-secondary px-4">
+                        ✨ Criar Conta
+                    </a>
+                }
+                else
+                {
+                    <a asp-page="/Builds/Index" class="btn btn-lg btn-secondary px-4">
+                        🛡️ As Minhas Builds
+                    </a>
+                }
+            </div>
+        </div>
     </div>
 
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">Informações do Projeto</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-borderless">
+    <!-- Fun Features Grid -->
+    <h2 class="text-center title mb-4 fs-2">Escolhe a Tua Vocação</h2>
+    <div class="row g-4 mb-5">
+        <div class="col-md-3 col-sm-6">
+            <div class="glass-card p-4 text-center h-100">
+                <div class="fs-1 mb-2">🔥</div>
+                <h4 class="fw-bold mb-2 text-primary">Feiticeiro</h4>
+                <p class="text-muted small mb-0">Magias explosivas e dano elemental devastador de longa distância.</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="glass-card p-4 text-center h-100">
+                <div class="fs-1 mb-2">🛡️</div>
+                <h4 class="fw-bold mb-2 text-primary">Guerreiro</h4>
+                <p class="text-muted small mb-0">A linha da frente indestrutível que protege os seus aliados com aço e glória.</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="glass-card p-4 text-center h-100">
+                <div class="fs-1 mb-2">🏹</div>
+                <h4 class="fw-bold mb-2 text-primary">Arqueiro</h4>
+                <p class="text-muted small mb-0">Precisão letal de longe e agilidade incomparável para fugir de qualquer perigo.</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="glass-card p-4 text-center h-100">
+                <div class="fs-1 mb-2">⚡</div>
+                <h4 class="fw-bold mb-2 text-primary">Ladino</h4>
+                <p class="text-muted small mb-0">Ataques furtivos pelas costas, venenos e mobilidade nas sombras.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Academic and Demo Section -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="glass-card p-4 h-100">
+                <h3 class="title mb-3 fs-4">📚 Sobre o Projeto Académico</h3>
+                <p class="text-muted">
+                    Este fórum foi desenvolvido como um trabalho prático focado na criação de uma plataforma web interativa, robusta e moderna, utilizando tecnologias consolidadas de desenvolvimento backend e frontend.
+                </p>
+                <div class="table-responsive mt-3">
+                    <table class="table table-borderless align-middle mb-0">
                         <tbody>
                             <tr>
-                                <th scope="row" style="width: 30%">Curso:</th>
+                                <th scope="row" class="ps-0" style="width: 25%">Curso:</th>
                                 <td>Licenciatura em Engenharia Informática</td>
                             </tr>
                             <tr>
-                                <th scope="row">Disciplina:</th>
-                                <td>Desenvolvimento Web</td>
+                                <th scope="row" class="ps-0">Disciplina:</th>
+                                <td>Desenvolvimento Web (2025/2026)</td>
                             </tr>
                             <tr>
-                                <th scope="row">Ano Letivo:</th>
-                                <td>2025/2026 - 2º Ano, 2º Semestre</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Autores:</th>
+                                <th scope="row" class="ps-0">Autores:</th>
                                 <td>
                                     <ul class="list-unstyled mb-0">
-                                        <li>João Alexandre de Abreu - 24844</li>
-                                        <li>Rodrigo Mendes Pinheiro - 26402</li>
+                                        <li>👨‍💻 João Alexandre de Abreu (24844)</li>
+                                        <li>👨‍💻 Rodrigo Mendes Pinheiro (26402)</li>
                                     </ul>
                                 </td>
                             </tr>
@@ -44,32 +97,27 @@
                     </table>
                 </div>
             </div>
-
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0">Tecnologias e Bibliotecas</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-info text-dark">ASP.NET Core 10.0</span>
-                        <span class="badge bg-info text-dark">Razor Pages</span>
-                        <span class="badge bg-info text-dark">Entity Framework Core</span>
-                        <span class="badge bg-info text-dark">SQLite</span>
-                        <span class="badge bg-info text-dark">Bootstrap 5</span>
-                        <span class="badge bg-info text-dark">jQuery</span>
-                        <span class="badge bg-info text-dark">SignalR</span>
-                        <span class="badge bg-info text-dark">JWT (API)</span>
+        </div>
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100 border-warning" style="background: rgba(245, 158, 11, 0.03);">
+                <h3 class="title mb-3 fs-4 text-warning">🔑 Acesso de Demonstração</h3>
+                <p class="text-muted small">
+                    Podes usar a seguinte conta administrativa pré-configurada para testar a moderação, criar novas classes e gerir a plataforma:
+                </p>
+                <div class="p-3 bg-white rounded-3 border border-warning border-opacity-25 shadow-sm">
+                    <div class="mb-2">
+                        <span class="text-muted small d-block">Utilizador / Email:</span>
+                        <code class="fs-6 text-primary">admin@mail.pt</code>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Palavra-passe:</span>
+                        <code class="fs-6 text-primary">Aa0_aa</code>
                     </div>
                 </div>
-            </div>
-
-            <div class="card shadow-sm border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">Acesso de Demonstração (Administrador)</h5>
-                </div>
-                <div class="card-body">
-                    <p class="mb-1"><strong>Login:</strong> <code>admin@mail.pt</code></p>
-                    <p class="mb-0"><strong>Password:</strong> <code>Aa0_aa</code></p>
+                <div class="mt-3 text-center">
+                    <a asp-area="Identity" asp-page="/Account/Login" class="friendly-link text-warning fw-bold">
+                        Entrar agora &rarr;
+                    </a>
                 </div>
             </div>
         </div>
