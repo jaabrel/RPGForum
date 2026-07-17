@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace RPGForumApi.Models
+namespace RPGForum.Models
 {
     public class ApiLoginModel
     {
