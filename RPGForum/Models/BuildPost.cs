@@ -8,8 +8,8 @@ namespace RPGForum.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey(nameof(Utilizadores))]
-        public int UtilizadorID { get; set; }
+        [ForeignKey(nameof(Utilizadores))] 
+        public string UtilizadorID { get; set; } = string.Empty;
 
         [ForeignKey(nameof(Personagens))]
         public int CharacterId { get; set; }

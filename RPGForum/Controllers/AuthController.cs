@@ -9,13 +9,13 @@ namespace RPGForum.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<Utilizadores> _userManager;
+        private readonly SignInManager<Utilizadores> _signInManager;
         private readonly TokenService _tokenService;
 
         public AuthController(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<Utilizadores> userManager,
+            SignInManager<Utilizadores> signInManager,
             TokenService tokenService)
         {
             _userManager = userManager;
@@ -52,7 +52,7 @@ namespace RPGForum.Controllers
             }
 
             var roles = await _userManager.GetRolesAsync(user);
-            var token = _tokenService.GenerateToken(user, roles);
+            var token = _tokenService.GenerateToken(user);
 
             return Ok(new
             {

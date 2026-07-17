@@ -12,9 +12,9 @@ namespace RPGForum.Controllers
     public class BuildsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Utilizadores> _userManager;
 
-        public BuildsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public BuildsController(ApplicationDbContext context, UserManager<Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -37,7 +37,7 @@ namespace RPGForum.Controllers
                     b.Level,
                     b.CreatedAt,
                     b.UpdatedAt,
-                    Autor = b.User.Username,
+                    Autor = b.User.UserName,
                     Classe = b.CharClass.Name
                 })
                 .ToListAsync();
@@ -76,7 +76,7 @@ namespace RPGForum.Controllers
                 build.Level,
                 build.CreatedAt,
                 build.UpdatedAt,
-                Autor = build.User.Username,
+                Autor = build.User.UserName,
                 Classe = build.CharClass.Name,
                 Estatisticas = build.Stats != null ? new
                 {
@@ -105,7 +105,7 @@ namespace RPGForum.Controllers
                 Comentarios = build.Comments.Select(c => new
                 {
                     c.Id,
-                    Autor = c.User.Username,
+                    Autor = c.User.UserName,
                     c.Content,
                     c.CreatedAt,
                     c.ParentId
@@ -128,8 +128,7 @@ namespace RPGForum.Controllers
                 return Challenge();
             }
 
-            var utilizador = await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.UserId == identityUser.UserName);
+            var utilizador = identityUser;
 
             if (utilizador == null)
             {

@@ -187,7 +187,7 @@ namespace RPGForum.Pages.Builds
             if (identityUser == null) return null;
 
             return await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
+                .FirstOrDefaultAsync(u => u.UserId == identityUser.UserName);
         }
     }
 }

@@ -13,9 +13,9 @@ namespace RPGForum.Pages.Builds
     public class EditModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Utilizadores> _userManager;
 
-        public EditModel(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public EditModel(ApplicationDbContext context, UserManager<Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -159,7 +159,7 @@ namespace RPGForum.Pages.Builds
             if (identityUser == null) return null;
 
             return await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
+                .FirstOrDefaultAsync(u => u.UserId == identityUser.UserName);
         }
     }
 

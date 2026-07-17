@@ -10,7 +10,7 @@ namespace RPGForum.Pages.Admin.Acessorios;
 public class DetailsModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Utilizadores> _userManager;
 
         public DetailsModel(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
@@ -186,6 +186,6 @@ public class DetailsModel : PageModel
             if (identityUser == null) return null;
 
             return await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
+                .FirstOrDefaultAsync(u => u.UserId == identityUser.UserName);
         }
     }

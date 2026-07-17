@@ -12,9 +12,9 @@ namespace RPGForum.Pages.Builds
     public class IndexModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Utilizadores> _userManager;
 
-        public IndexModel(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public IndexModel(ApplicationDbContext context, UserManager<Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -34,7 +34,7 @@ namespace RPGForum.Pages.Builds
             Builds = await _context.Builds
                 .Where(b => b.UtilizadorID == utilizador.Id)
                 .Include(b => b.CharClass)
-                .Include(b => b.Stats) // ADICIONADO: Inclui estatísticas na lista
+                .Include(b => b.Stats) 
                 .Include(b => b.Likes)
                 .Include(b => b.Comments)
                 .OrderByDescending(b => b.UpdatedAt)
@@ -52,17 +52,17 @@ namespace RPGForum.Pages.Builds
             if (identityUser == null) return null;
 
             var utilizador = await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
+                .FirstOrDefaultAsync(u => u.UserId == identityUser.UserName);
 
             if (utilizador == null)
             {
                 // Criar registo na tabela Utilizadores se ainda não existir
                 utilizador = new Utilizadores
                 {
-                    Username = identityUser.UserName!.Split('@')[0],
+                    UserName = identityUser.UserName!.Split('@')[0],
                     Email = identityUser.Email!,
                     Password = "", // Gerido pelo Identity
-                    IdentityUserName = identityUser.UserName,
+                    UserId = identityUser.UserName,
                     Role = "Registered"
                 };
                 _context.Utilizadores.Add(utilizador);

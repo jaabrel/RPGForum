@@ -117,7 +117,7 @@ namespace RPGForum.Pages.Builds
             if (identityUser == null) return null;
 
             var utilizador = await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
+                .FirstOrDefaultAsync(u => u.UserId == identityUser.UserName);
 
             if (utilizador == null)
             {
@@ -126,7 +126,7 @@ namespace RPGForum.Pages.Builds
                     Username = identityUser.UserName!.Split('@')[0],
                     Email = identityUser.Email!,
                     Password = "",
-                    IdentityUserName = identityUser.UserName,
+                    UserId = identityUser.UserName,
                     Role = "Registered"
                 };
                 _context.Utilizadores.Add(utilizador);

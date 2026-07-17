@@ -1,13 +1,13 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace RPGForumApi.Models
+namespace RPGForum.Models
 {
     public class ApiLoginModel
     {
         [Required(ErrorMessage = "O email é obrigatório")]
         [EmailAddress(ErrorMessage = "Formato de email inválido")]
         public string Email { get; set; } = string.Empty;
-
+        
         [Required(ErrorMessage = "A senha é obrigatória")]
         public string Password { get; set; } = string.Empty;
     }
