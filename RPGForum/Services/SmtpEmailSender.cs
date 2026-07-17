@@ -1,33 +1,59 @@
 ﻿using MailKit.Net.Smtp;
-using MimeKit;
+using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Configuration;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using MimeKit;
 
 namespace RPGForum.Services
 {
-    public class SmtpEmailSender : IEmailSender
-    {
-        private readonly IConfiguration _config;
 
-        public SmtpEmailSender(IConfiguration config)
+    /// <summary>
+    /// EmailSettings - Configuração de envio de emails. Vindo do appsettings.json
+    /// </summary>
+    public class EmailSettings
+    {
+        public string SmtpServer { get; set; } = "smtp.gmail.com";
+        public int SmtpPort { get; set; } = 587;
+        public string SenderEmail { get; set; } = string.Empty;
+        public string SenderPassword { get; set; } = string.Empty;
+        public string SenderName { get; set; } = "RPG Forum";
+    }
+
+    /// <summary>
+    /// Enviar Emails através do SMTP do GMAIL. 
+    /// </summary>
+    public class GmailEmailSender : IEmailSender
+    {
+        private readonly EmailSettings _settings;
+
+        public GmailEmailSender(IOptions<EmailSettings> settings)
         {
-            _config = config;
+            _settings = settings.Value;
         }
 
-        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+                public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress("RPG Forum", _config["Smtp:From"]));
-            emailMessage.To.Add(new MailboxAddress("", email));
-            emailMessage.Subject = subject;
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = htmlMessage };
-
-            using (var client = new SmtpClient())
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_settings.SenderName, _settings.SenderEmail));
+            
+            message.To.Add(MailboxAddress.Parse(email));
+            message.Subject = subject;
+ 
+            message.Body = new BodyBuilder
             {
-                await client.ConnectAsync(_config["Smtp:Host"], int.Parse(_config["Smtp:Port"]), false);
-                await client.AuthenticateAsync(_config["Smtp:from"], _config["Smtp:Password"]);
-                await client.SendAsync(emailMessage);
+                HtmlBody = htmlMessage
+            }.ToMessageBody();
+ 
+            using var client = new SmtpClient();
+ 
+            try
+            {
+                await client.ConnectAsync(_settings.SmtpServer, _settings.SmtpPort, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_settings.SenderEmail, _settings.SenderPassword);
+                await client.SendAsync(message);
+            }
+            finally
+            {
                 await client.DisconnectAsync(true);
             }
         }

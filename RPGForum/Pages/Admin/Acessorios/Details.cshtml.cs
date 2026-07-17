@@ -5,21 +5,22 @@ using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Models;
 using System.ComponentModel.DataAnnotations;
-namespace RPGForum.Pages.Admin.Acessorios;
 
-public class DetailsModel : PageModel
+namespace RPGForum.Pages.Admin.Acessorios
+{
+    public class DetailsModel : PageModel
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Utilizadores> _userManager;
 
-        public DetailsModel(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public DetailsModel(ApplicationDbContext context, UserManager<Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
         // --- Dados da página ---
-        public BuildPost Build { get; set; } = null!;
+        public Models.Build Build { get; set; } = null!;
         public bool IsAutor { get; set; }
         public bool JaDeuGosto { get; set; }
         public Utilizadores? UtilizadorAtual { get; set; }
@@ -31,8 +32,7 @@ public class DetailsModel : PageModel
         public string Conteudo { get; set; } = string.Empty;
 
         // Id do comentário pai (para respostas); null = comentário raiz
-        [BindProperty]
-        public int? CommentParentId { get; set; }
+        [BindProperty] public int? CommentParentId { get; set; }
 
         // --- GET ---
         public async Task<IActionResult> OnGetAsync(int id)
@@ -150,7 +150,7 @@ public class DetailsModel : PageModel
 
         // --- Helpers privados ---
 
-        private async Task<BuildPost?> CarregarBuildAsync(int id)
+        private async Task<Models.Build?> CarregarBuildAsync(int id)
         {
             return await _context.Builds
                 .Include(b => b.User)
@@ -158,14 +158,14 @@ public class DetailsModel : PageModel
                 .Include(b => b.Stats)
                 .Include(b => b.Likes)
                 .Include(b => b.BuidWeapons)
-                    .ThenInclude(bw => bw.Weapon)
+                .ThenInclude(bw => bw.Weapon)
                 .Include(b => b.BuildAccessories)
-                    .ThenInclude(ba => ba.Accessory)
+                .ThenInclude(ba => ba.Accessory)
                 .Include(b => b.Comments.Where(c => c.ParentId == null))
-                    .ThenInclude(c => c.User)
+                .ThenInclude(c => c.User)
                 .Include(b => b.Comments.Where(c => c.ParentId == null))
-                    .ThenInclude(c => c.Replies)
-                        .ThenInclude(r => r.User)
+                .ThenInclude(c => c.Replies)
+                .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
@@ -182,10 +182,10 @@ public class DetailsModel : PageModel
 
         private async Task<Utilizadores?> ObterUtilizadorAtualAsync()
         {
-            var identityUser = await _userManager.GetUserAsync(User);
-            if (identityUser == null) return null;
+            var utilizador = await _userManager.GetUserAsync(User);
+            if (utilizador == null) return null;
 
-            return await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.UserId == identityUser.UserName);
+            return utilizador;
         }
     }
+}

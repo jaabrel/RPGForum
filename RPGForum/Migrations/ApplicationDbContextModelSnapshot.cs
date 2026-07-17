@@ -15,7 +15,7 @@ namespace RPGForum.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -87,6 +87,11 @@ namespace RPGForum.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
@@ -138,23 +143,9 @@ namespace RPGForum.Migrations
 
                     b.ToTable("AspNetUsers", (string)null);
 
-                    b.HasData(
-                        new
-                        {
-                            Id = "admin",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "fe626d10-17f8-4768-8818-895627758300",
-                            Email = "admin@mail.pt",
-                            EmailConfirmed = true,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "ADMIN@MAIL.PT",
-                            NormalizedUserName = "ADMIN@MAIL.PT",
-                            PasswordHash = "AQAAAAEAACcQAAAAEHX9OhBfKGUsbLTayhBCZ3WRcp+X+ivBA00sBQI5YG2NPaVbTJsVKE9jOgm/4Sb2RQ==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "1bcbd0a7-5c9d-4510-811a-cd5eee6c0dbe",
-                            TwoFactorEnabled = false,
-                            UserName = "admin@mail.pt"
-                        });
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -302,25 +293,7 @@ namespace RPGForum.Migrations
                     b.ToTable("Armas");
                 });
 
-            modelBuilder.Entity("RPGForum.Models.BuildAccessory", b =>
-                {
-                    b.Property<int>("BuildId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AccessoryId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SlotPosition")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("BuildId", "AccessoryId");
-
-                    b.HasIndex("AccessoryId");
-
-                    b.ToTable("BuildAccessories");
-                });
-
-            modelBuilder.Entity("RPGForum.Models.BuildPost", b =>
+            modelBuilder.Entity("RPGForum.Models.Build", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -350,11 +323,13 @@ namespace RPGForum.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("UtilizadorID")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("UtilizadorID")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -363,6 +338,24 @@ namespace RPGForum.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Builds");
+                });
+
+            modelBuilder.Entity("RPGForum.Models.BuildAccessory", b =>
+                {
+                    b.Property<int>("BuildId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AccessoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SlotPosition")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("BuildId", "AccessoryId");
+
+                    b.HasIndex("AccessoryId");
+
+                    b.ToTable("BuildAccessories");
                 });
 
             modelBuilder.Entity("RPGForum.Models.BuildWeapon", b =>
@@ -403,8 +396,9 @@ namespace RPGForum.Migrations
                     b.Property<int?>("ParentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -464,8 +458,9 @@ namespace RPGForum.Migrations
                     b.Property<DateTime>("CretatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -503,24 +498,9 @@ namespace RPGForum.Migrations
 
             modelBuilder.Entity("RPGForum.Models.Utilizadores", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IdentityUserName")
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Role")
@@ -528,20 +508,27 @@ namespace RPGForum.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("TEXT");
+                    b.HasDiscriminator().HasValue("Utilizadores");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("Utilizadores");
+                    b.HasData(
+                        new
+                        {
+                            Id = "admin",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "fe626d10-17f8-4768-8818-895627758300",
+                            Email = "admin@mail.pt",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@MAIL.PT",
+                            NormalizedUserName = "ADMIN@MAIL.PT",
+                            PasswordHash = "AQAAAAEAACcQAAAAEHX9OhBfKGUsbLTayhBCZ3WRcp+X+ivBA00sBQI5YG2NPaVbTJsVKE9jOgm/4Sb2RQ==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "1bcbd0a7-5c9d-4510-811a-cd5eee6c0dbe",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@mail.pt",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Role = "Administrator"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -595,26 +582,7 @@ namespace RPGForum.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RPGForum.Models.BuildAccessory", b =>
-                {
-                    b.HasOne("RPGForum.Models.Acessorios", "Accessory")
-                        .WithMany("BuildAccessories")
-                        .HasForeignKey("AccessoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RPGForum.Models.BuildPost", "Build")
-                        .WithMany("BuildAccessories")
-                        .HasForeignKey("BuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Accessory");
-
-                    b.Navigation("Build");
-                });
-
-            modelBuilder.Entity("RPGForum.Models.BuildPost", b =>
+            modelBuilder.Entity("RPGForum.Models.Build", b =>
                 {
                     b.HasOne("RPGForum.Models.Personagens", "CharClass")
                         .WithMany("Builds")
@@ -633,9 +601,28 @@ namespace RPGForum.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("RPGForum.Models.BuildAccessory", b =>
+                {
+                    b.HasOne("RPGForum.Models.Acessorios", "Accessory")
+                        .WithMany("BuildAccessories")
+                        .HasForeignKey("AccessoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RPGForum.Models.Build", "Build")
+                        .WithMany("BuildAccessories")
+                        .HasForeignKey("BuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Accessory");
+
+                    b.Navigation("Build");
+                });
+
             modelBuilder.Entity("RPGForum.Models.BuildWeapon", b =>
                 {
-                    b.HasOne("RPGForum.Models.BuildPost", "Build")
+                    b.HasOne("RPGForum.Models.Build", "Build")
                         .WithMany("BuidWeapons")
                         .HasForeignKey("BuildId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -654,7 +641,7 @@ namespace RPGForum.Migrations
 
             modelBuilder.Entity("RPGForum.Models.Comment", b =>
                 {
-                    b.HasOne("RPGForum.Models.BuildPost", "Build")
+                    b.HasOne("RPGForum.Models.Build", "Build")
                         .WithMany("Comments")
                         .HasForeignKey("BuildId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -680,7 +667,7 @@ namespace RPGForum.Migrations
 
             modelBuilder.Entity("RPGForum.Models.Estatisticas", b =>
                 {
-                    b.HasOne("RPGForum.Models.BuildPost", "Build")
+                    b.HasOne("RPGForum.Models.Build", "Build")
                         .WithOne("Stats")
                         .HasForeignKey("RPGForum.Models.Estatisticas", "BuildId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -691,7 +678,7 @@ namespace RPGForum.Migrations
 
             modelBuilder.Entity("RPGForum.Models.Like", b =>
                 {
-                    b.HasOne("RPGForum.Models.BuildPost", "Build")
+                    b.HasOne("RPGForum.Models.Build", "Build")
                         .WithMany("Likes")
                         .HasForeignKey("BuildId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -718,7 +705,7 @@ namespace RPGForum.Migrations
                     b.Navigation("BuildWeapons");
                 });
 
-            modelBuilder.Entity("RPGForum.Models.BuildPost", b =>
+            modelBuilder.Entity("RPGForum.Models.Build", b =>
                 {
                     b.Navigation("BuidWeapons");
 

@@ -10,7 +10,7 @@ namespace RPGForum.Data
 
         public DbSet<Utilizadores> Utilizadores { get; set; }
         public DbSet<Personagens> Personagens { get; set; }
-        public DbSet<BuildPost> Builds { get; set; }
+        public DbSet<Build> Builds { get; set; }
         public DbSet<Estatisticas> Estatisticas { get; set; }
         public DbSet<Armas> Armas { get; set; }
         public DbSet<Acessorios> Acessorios { get; set; }
@@ -39,7 +39,7 @@ namespace RPGForum.Data
                     ConcurrencyStamp = "fe626d10-17f8-4768-8818-895627758300",
                     PasswordHash = "AQAAAAEAACcQAAAAEHX9OhBfKGUsbLTayhBCZ3WRcp+X+ivBA00sBQI5YG2NPaVbTJsVKE9jOgm/4Sb2RQ==",
                     Role = "Administrator",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
 
@@ -55,10 +55,10 @@ namespace RPGForum.Data
             builder.Entity<Comment>()
                 .HasOne(c => c.Parent).WithMany(c => c.Replies).HasForeignKey(c => c.ParentId).OnDelete(DeleteBehavior.Restrict);
             
-            builder.Entity<BuildPost>()
+            builder.Entity<Build>()
                 .HasMany(b => b.Comments).WithOne(c => c.Build).OnDelete(DeleteBehavior.Cascade);
             
-            builder.Entity<BuildPost>()
+            builder.Entity<Build>()
                 .HasMany(b => b.Likes).WithOne(L => L.Build).OnDelete(DeleteBehavior.Cascade);
             
             builder.Entity<Comment>()

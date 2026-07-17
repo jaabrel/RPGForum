@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Models;
@@ -9,12 +10,12 @@ namespace RPGForum.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BuildsController : ControllerBase
+    public class BuildController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Utilizadores> _userManager;
 
-        public BuildsController(ApplicationDbContext context, UserManager<Utilizadores> userManager)
+        public BuildController(ApplicationDbContext context, UserManager<Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -115,6 +116,21 @@ namespace RPGForum.Controllers
             return Ok(result);
         }
 
+        [HttpPost]
+        [Authorize]
+        public async Task<ActionResult<Build>> PostBuild(Build build)
+        {
+            var utilizador = await _userManager.GetUserAsync(User);
+            if (utilizador == null) return Unauthorized();
+
+            build.UtilizadorID = utilizador.Id;
+            build.CreatedAt = DateTime.UtcNow;
+
+            _context.Builds.Add(build);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetBuild), new { id = build.Id }, build);
+        }
+        
         /// <summary>
         /// Eliminar uma build (requer autenticação)
         /// </summary>
@@ -122,13 +138,7 @@ namespace RPGForum.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteBuild(int id)
         {
-            var identityUser = await _userManager.GetUserAsync(User);
-            if (identityUser == null)
-            {
-                return Challenge();
-            }
-
-            var utilizador = identityUser;
+            var utilizador = await _userManager.GetUserAsync(User);
 
             if (utilizador == null)
             {

@@ -1,0 +1,63 @@
+@page
+@model RPGForum.Pages.Build.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Build</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Build.Id" />
+            <div class="form-group">
+                <label asp-for="Build.UtilizadorID" class="control-label"></label>
+                <input asp-for="Build.UtilizadorID" class="form-control" />
+                <span asp-validation-for="Build.UtilizadorID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Build.CharacterId" class="control-label"></label>
+                <input asp-for="Build.CharacterId" class="form-control" />
+                <span asp-validation-for="Build.CharacterId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+<span class="text-danger">*</span>
+                <label asp-for="Build.Title" class="control-label"></label>
+                <input asp-for="Build.Title" class="form-control" aria-required="true"/>
+                <span asp-validation-for="Build.Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Build.Description" class="control-label"></label>
+                <input asp-for="Build.Description" class="form-control" />
+                <span asp-validation-for="Build.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Build.Level" class="control-label"></label>
+                <input asp-for="Build.Level" class="form-control" />
+                <span asp-validation-for="Build.Level" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Build.CreatedAt" class="control-label"></label>
+                <input asp-for="Build.CreatedAt" class="form-control" />
+                <span asp-validation-for="Build.CreatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Build.UpdatedAt" class="control-label"></label>
+                <input asp-for="Build.UpdatedAt" class="form-control" />
+                <span asp-validation-for="Build.UpdatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
