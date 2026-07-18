@@ -53,6 +53,7 @@ public class BuildsController : ControllerBase
     // PUT: api/Build/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<IActionResult> PutBuild(int? id, Build build)
     {
         if (id != build.Id)
