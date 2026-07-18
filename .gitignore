@@ -366,3 +366,7 @@ FodyWeavers.xsd
 
 .idea/.idea.RPGForum/.idea/
 .vscode/
+
+# SQLite temporary database journal files
+*.db-shm
+*.db-wal
