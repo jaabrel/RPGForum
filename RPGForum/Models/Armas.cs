@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RPGForum.Models
@@ -29,6 +29,9 @@ namespace RPGForum.Models
         /// URL da imagem da arma
         /// </summary>
         public string? ImageUrl { get; set; }
+
+        public string? StatAfetada { get; set; }
+        public string? StatBonus { get; set; }
 
         public ICollection<BuildWeapon> BuildWeapons { get; set; } = new List<BuildWeapon>();
 

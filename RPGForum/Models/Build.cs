@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography.Pkcs;
 
@@ -11,13 +11,13 @@ namespace RPGForum.Models
         /// <summary>
         /// ID do utilizador que criou o build
         /// </summary>
-        [ForeignKey(nameof(Utilizadores))] 
+        [ForeignKey(nameof(User))]
         public string UtilizadorID { get; set; } = string.Empty;
 
         /// <summary>
         /// ID da personagem que vai ser usada no build
         /// </summary>
-        [ForeignKey(nameof(Personagens))]
+        [ForeignKey(nameof(CharClass))]
         public int CharacterId { get; set; }
 
         /// <summary>

@@ -1,72 +1,109 @@
 @page
 @model RPGForum.Pages.Build.IndexModel
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "As minhas Builds";
 }
 
-<h1>Index</h1>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🛡️ As minhas Builds</h2>
+        <a asp-page="/Build/Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Criar Nova Build
+        </a>
+    </div>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Build[0].UtilizadorID)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Build[0].CharacterId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Build[0].Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Build[0].Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Build[0].Level)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Build[0].CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Build[0].UpdatedAt)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Build) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.UtilizadorID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CharacterId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Level)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    @if (Model.MensagemSucesso != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @Model.MensagemSucesso
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Título</th>
+                            <th scope="col">Personagem</th>
+                            <th scope="col">Nível</th>
+                            <th scope="col">Estatísticas (HP/FOR/DEF/MAG/RES/VEL)</th>
+                            <th scope="col" class="text-center">Feedback</th>
+                            <th scope="col">Última Atualização</th>
+                            <th scope="col" class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Builds.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <p class="mb-2">Ainda não criaste nenhuma build.</p>
+                                    <a asp-page="/Build/Create" class="btn btn-sm btn-outline-primary">Criar a tua primeira build</a>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.Builds)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-page="./Details" asp-route-id="@item.Id" class="fw-bold text-decoration-none text-dark">
+                                            @item.Title
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@item.CharClass?.Name</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">Nível @item.Level</span>
+                                    </td>
+                                    <td>
+                                        @if (item.Stats != null)
+                                        {
+                                            <span class="small text-muted">
+                                                HP: <strong>@item.Stats.Hp</strong> | 
+                                                FOR: <strong>@item.Stats.Strength</strong> | 
+                                                DEF: <strong>@item.Stats.Defense</strong> | 
+                                                MAG: <strong>@item.Stats.Magic</strong> | 
+                                                RES: <strong>@item.Stats.Endurance</strong> | 
+                                                VEL: <strong>@item.Stats.Speed</strong>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Sem stats</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="me-2" title="Gostos">♥ @item.Likes.Count</span>
+                                        <span title="Comentários">💬 @item.Comments.Count</span>
+                                    </td>
+                                    <td class="small text-muted">
+                                        @item.UpdatedAt.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-page="./Details" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Visualizar Detalhes">
+                                                Ver
+                                            </a>
+                                            <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary" title="Editar Build">
+                                                Editar
+                                            </a>
+                                            <a asp-page="./Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="Apagar Build">
+                                                Apagar
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

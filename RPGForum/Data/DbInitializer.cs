@@ -7,7 +7,33 @@ namespace RPGForum.Data
     {
         public static async Task SeedAsync(ApplicationDbContext context)
         {
-            await context.Database.EnsureCreatedAsync();
+            try
+            {
+                using (var cmd = context.Database.GetDbConnection().CreateCommand())
+                {
+                    await context.Database.OpenConnectionAsync();
+
+                    // 1. Rename initial migration from 20260714100833_DB1 to 20260717150801_InitialCreate
+                    cmd.CommandText = "UPDATE __EFMigrationsHistory SET MigrationId = '20260717150801_InitialCreate' WHERE MigrationId = '20260714100833_DB1';";
+                    await cmd.ExecuteNonQueryAsync();
+
+                    // 2. Rename stats migration from 20260718174412_AddEquipStats to 20260718190342_AddEquipStats
+                    cmd.CommandText = "UPDATE __EFMigrationsHistory SET MigrationId = '20260718190342_AddEquipStats' WHERE MigrationId = '20260718174412_AddEquipStats';";
+                    await cmd.ExecuteNonQueryAsync();
+
+                    // 3. Set journal mode to DELETE permanently
+                    cmd.CommandText = "PRAGMA journal_mode=DELETE;";
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DB SYNC] Synchronization warning: {ex.Message}");
+            }
+
+
+
+            await context.Database.MigrateAsync();
 
             var existing = await context.Personagens.ToListAsync();
 
@@ -15,27 +41,21 @@ namespace RPGForum.Data
             {
                 new() 
                 { 
-                    Name = "Geralt de Rívia", 
-                    Description = "Um caçador de monstros mutante lendário da Escola do Lobo, mestre em esgrima e sinais mágicos simples.", 
-                    ImageUrl = "/images/characters/geralt.jpg" 
+                    Name = "Ichigo Kurosaki", 
+                    Description = "Um Shinigami substituto de Karakura, portador da icónica Zanpakutou Zangetsu e mestre do Getsuga Tenshou.", 
+                    ImageUrl = "/images/ichigo.png" 
                 },
                 new() 
                 { 
-                    Name = "Yennefer de Vengerberg", 
-                    Description = "Uma poderosa e inteligente feiticeira de Vengerberg, membro do Conselho e amante dos mistérios da magia.", 
-                    ImageUrl = "/images/characters/yennefer.jpg" 
+                    Name = "Goku", 
+                    Description = "Um lendário guerreiro Saiyajin criado na Terra, mestre de artes marciais, famoso pelo seu Kamehameha e pela busca constante de superar os seus limites.", 
+                    ImageUrl = "/images/goku.png" 
                 },
                 new() 
                 { 
-                    Name = "Legolas Greenleaf", 
-                    Description = "Um elfo da floresta de Mirkwood, mestre arqueiro com visão aguçada, agilidade inigualável e audição apurada.", 
-                    ImageUrl = "/images/characters/legolas.jpg" 
-                },
-                new() 
-                { 
-                    Name = "Ezio Auditore", 
-                    Description = "Um nobre florentino que se tornou um Mentor lendário da Irmandade dos Assassinos, mestre da furtividade e parkour.", 
-                    ImageUrl = "/images/characters/ezio.jpg" 
+                    Name = "Sonic the Hedgehog", 
+                    Description = "O ouriço azul mais rápido do mundo, defensor da liberdade que usa a sua velocidade supersónica e spin dash para derrotar o Dr. Eggman.", 
+                    ImageUrl = "/images/sonic.png" 
                 }
             };
 
@@ -54,6 +74,20 @@ namespace RPGForum.Data
                     for (int i = existing.Count; i < targetCharacters.Count; i++)
                     {
                         context.Personagens.Add(targetCharacters[i]);
+                    }
+                }
+                else if (existing.Count > targetCharacters.Count)
+                {
+                    var idsToRemove = existing.Skip(targetCharacters.Count).Select(e => e.Id).ToList();
+                    var buildsToUpdate = await context.Builds.Where(b => idsToRemove.Contains(b.CharacterId)).ToListAsync();
+                    foreach (var build in buildsToUpdate)
+                    {
+                        build.CharacterId = existing[0].Id;
+                    }
+
+                    for (int i = targetCharacters.Count; i < existing.Count; i++)
+                    {
+                        context.Personagens.Remove(existing[i]);
                     }
                 }
             }

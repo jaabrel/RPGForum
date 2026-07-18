@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - RPGForum</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RPGForum.styles.css" asp-append-version="true" />
 </head>
@@ -25,7 +26,7 @@
                             <a class="nav-link" asp-area="" asp-page="/FeedForum">Fórum</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Index">Sobre</a>
+                            <a class="nav-link" asp-area="" asp-page="/Sobre">Sobre</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Privacy">Privacidade</a>
@@ -33,7 +34,7 @@
                         @if (User.Identity!.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-page="/Builds/Index">As Minhas Builds</a>
+                                <a class="nav-link" asp-area="" asp-page="/Build/Index">As Minhas Builds</a>
                             </li>
                         }
                         @if (User.IsInRole("Administrator"))

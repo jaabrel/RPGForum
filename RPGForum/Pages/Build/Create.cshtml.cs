@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Models;
 using System;
@@ -11,79 +13,144 @@ using System.Threading.Tasks;
 
 namespace RPGForum.Pages.Build
 {
+    [Authorize]
     public class CreateModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<Utilizadores> _userManager;
+        private readonly UserManager<Models.Utilizadores> _userManager;
 
-        public CreateModel(ApplicationDbContext context, UserManager<Utilizadores> userManager)
+        public CreateModel(ApplicationDbContext context, UserManager<Models.Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
         [BindProperty]
-        public Models.Build Build { get; set; } = default!;
+        public Models.Build Build { get; set; } = new();
+
         [BindProperty]
-        public List<int> SelectedWeapons { get; set; } = new List<int>();
+        public Estatisticas Stats { get; set; } = new();
+
         [BindProperty]
-        public List<int> SelectedAccessories { get; set; } = new List<int>();
-        public SelectList PersonagensList { get; set; }
-        public List<Armas> AvailableWeapons { get; set; }
-        public List<Acessorios> AvailableAccessories { get; set; }
-        public IActionResult OnGet()
+        public string? ArmasNomes { get; set; }
+
+        [BindProperty]
+        public string? AcessoriosNomes { get; set; }
+
+        public SelectList PersonagensSelect { get; set; } = null!;
+        public IList<Armas> TodasArmas { get; set; } = new List<Armas>();
+        public IList<Acessorios> TodosAcessorios { get; set; } = new List<Acessorios>();
+
+        public async Task<IActionResult> OnGetAsync()
         {
-            LoadLists();
+            await CarregarListasAsync();
             return Page();
         }
+
         public async Task<IActionResult> OnPostAsync()
         {
+            // Remover validações de navegação que o ModelState não consegue preencher
+            ModelState.Remove("Build.User");
+            ModelState.Remove("Build.CharClass");
+            ModelState.Remove("Build.Stats");
+            ModelState.Remove("Stats.Build");
+
+            if (!ModelState.IsValid)
+            {
+                await CarregarListasAsync();
+                return Page();
+            }
+
             var utilizador = await _userManager.GetUserAsync(User);
             if (utilizador == null)
             {
-                return Challenge();
+                ModelState.AddModelError("", "Erro ao identificar o utilizador. Por favor tente novamente.");
+                await CarregarListasAsync();
+                return Page();
             }
-            // Atribuições automáticas
+
+            // Associar utilizador e timestamps
             Build.UtilizadorID = utilizador.Id;
             Build.CreatedAt = DateTime.UtcNow;
             Build.UpdatedAt = DateTime.UtcNow;
-            // Ignorar erros de validação das propriedades de navegação e campos automáticos
-            ModelState.Remove("Build.Utilizador");
-            ModelState.Remove("Build.Character");
-            ModelState.Remove("Build.BuildWeapons");
-            ModelState.Remove("Build.BuildAccessories");
-            ModelState.Remove("Build.UtilizadorID");
+
+            // Associar estatísticas diretamente ao objeto Build (necessário porque Stats é obrigatório na relação 1-1)
+            Build.Stats = Stats;
+
+            // Inicializar coleções da Build
+            Build.BuidWeapons = new List<BuildWeapon>();
+            Build.BuildAccessories = new List<BuildAccessory>();
+
+            // Parse e associar armas
+            var armasNomesLista = string.IsNullOrWhiteSpace(ArmasNomes)
+                ? new List<string>()
+                : ArmasNomes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+            foreach (var nomeArma in armasNomesLista)
+            {
+                var arma = await _context.Armas.FirstOrDefaultAsync(a => a.Name.ToLower() == nomeArma.ToLower());
+                if (arma == null)
+                {
+                    ModelState.AddModelError("ArmasNomes", $"A arma '{nomeArma}' não existe no sistema.");
+                }
+                else
+                {
+                    Build.BuidWeapons.Add(new BuildWeapon { WeaponId = arma.Id });
+                }
+            }
+
+            // Parse e associar acessórios
+            var acessoriosNomesLista = string.IsNullOrWhiteSpace(AcessoriosNomes)
+                ? new List<string>()
+                : AcessoriosNomes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+            for (int i = 0; i < acessoriosNomesLista.Count; i++)
+            {
+                var nomeAcessorio = acessoriosNomesLista[i];
+                var acessorio = await _context.Acessorios.FirstOrDefaultAsync(a => a.Name.ToLower() == nomeAcessorio.ToLower());
+                if (acessorio == null)
+                {
+                    ModelState.AddModelError("AcessoriosNomes", $"O acessório '{nomeAcessorio}' não existe no sistema.");
+                }
+                else
+                {
+                    Build.BuildAccessories.Add(new BuildAccessory
+                    {
+                        AccessoryId = acessorio.Id,
+                        SlotPosition = i + 1
+                    });
+                }
+            }
+
             if (!ModelState.IsValid)
             {
-                LoadLists();
+                await CarregarListasAsync();
                 return Page();
             }
-            _context.Builds.Add(Build);
-            await _context.SaveChangesAsync();
-            // Guardar as Armas selecionadas
-            if (SelectedWeapons != null && SelectedWeapons.Any())
+
+            try
             {
-                foreach (var weaponId in SelectedWeapons)
-                {
-                    _context.BuildWeapons.Add(new BuildWeapon { BuildId = Build.Id, WeaponId = weaponId });
-                }
+                _context.Builds.Add(Build);
+                await _context.SaveChangesAsync();
             }
-            // Guardar os Acessórios selecionados
-            if (SelectedAccessories != null && SelectedAccessories.Any())
+            catch (DbUpdateException ex)
             {
-                foreach (var accessoryId in SelectedAccessories)
-                {
-                    _context.BuildAccessories.Add(new BuildAccessory { BuildId = Build.Id, AccessoryId = accessoryId });
-                }
+                var message = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                ModelState.AddModelError("", $"Erro ao gravar a build na base de dados: {message}");
+                await CarregarListasAsync();
+                return Page();
             }
-            await _context.SaveChangesAsync();
-            return RedirectToPage("./Index");
+
+            TempData["Sucesso"] = $"Build \"{Build.Title}\" criada com sucesso!";
+            return RedirectToPage("Index");
         }
-        private void LoadLists()
+
+        private async Task CarregarListasAsync()
         {
-            PersonagensList = new SelectList(_context.Personagens, "Id", "Name");
-            AvailableWeapons = _context.Armas.ToList();
-            AvailableAccessories = _context.Acessorios.ToList();
+            var personagens = await _context.Personagens.OrderBy(p => p.Name).ToListAsync();
+            PersonagensSelect = new SelectList(personagens, "Id", "Name");
+            TodasArmas = await _context.Armas.OrderBy(a => a.Name).ToListAsync();
+            TodosAcessorios = await _context.Acessorios.OrderBy(a => a.Name).ToListAsync();
         }
     }
 }

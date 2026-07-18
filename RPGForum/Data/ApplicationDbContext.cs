@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RPGForum.Models;
@@ -71,6 +71,17 @@ namespace RPGForum.Data
             builder.Entity<Like>()
                 .HasOne(l => l.User).WithMany(u => u.Likes).HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<Build>()
+                .HasOne(b => b.User)
+                .WithMany(u => u.Builds)
+                .HasForeignKey(b => b.UtilizadorID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Build>()
+                .HasOne(b => b.CharClass)
+                .WithMany(c => c.Builds)
+                .HasForeignKey(b => b.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
 
