@@ -15,7 +15,7 @@ namespace RPGForum.Pages
             _context = context;
         }
 
-        public IList<BuildPost> Builds { get; set; } = new List<BuildPost>();
+        public IList<Models.Build> Builds { get; set; } = new List<Models.Build>();
         public IList<Personagens> Personagens { get; set; } = new List<Personagens>();
         public IList<Utilizadores> Utilizadores { get; set; } = new List<Utilizadores>();
 
@@ -26,7 +26,7 @@ namespace RPGForum.Pages
         public int? PersonagemId { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public int? UtilizadorID { get; set; }
+        public string? UtilizadorID { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public string Ordenar { get; set; } = "recente";
@@ -48,7 +48,7 @@ namespace RPGForum.Pages
 
             // Carregar utilizadores para o filtro
             Utilizadores = await _context.Utilizadores
-                .OrderBy(u => u.Username)
+                .OrderBy(u => u.UserName)
                 .ToListAsync();
 
             // Construir query com LINQ
@@ -74,9 +74,9 @@ namespace RPGForum.Pages
             }
 
             // Filtro por utilizador
-            if (UtilizadorID.HasValue)
+            if (!string.IsNullOrEmpty(UtilizadorID))
             {
-                query = query.Where(b => b.UtilizadorID == UtilizadorID.Value);
+                query = query.Where(b => b.UtilizadorID == UtilizadorID);
             }
 
             // Ordenação

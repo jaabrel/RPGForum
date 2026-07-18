@@ -1,19 +1,17 @@
 using MailKit.Net.Smtp;
-using MimeKit;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
+using MimeKit;
 
 namespace RPGForum.Services
 {
+    /// <summary>
+    /// Enviar Emails através do SMTP do GMAIL. 
+    /// </summary>
     public class SmtpEmailSender : IEmailSender
     {
         private readonly IConfiguration _config;
-
-        public SmtpEmailSender(IConfiguration config)
-        {
-            _config = config;
-        }
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
@@ -34,10 +32,10 @@ namespace RPGForum.Services
 
                 using var client = new SmtpClient();
                 var port = int.Parse(_config["Smtp:Port"] ?? "587");
-                
+
                 // Suporta STARTTLS (Porta 587) e SSL/TLS (Porta 465) automaticamente
                 await client.ConnectAsync(host, port, MailKit.Security.SecureSocketOptions.Auto);
-                
+
                 await client.AuthenticateAsync(_config["Smtp:From"], _config["Smtp:Password"]);
                 await client.SendAsync(emailMessage);
                 await client.DisconnectAsync(true);

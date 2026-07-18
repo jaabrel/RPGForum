@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RPGForum.Migrations
 {
     /// <inheritdoc />
-    public partial class DB1 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -62,6 +62,9 @@ namespace RPGForum.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Discriminator = table.Column<string>(type: "TEXT", maxLength: 13, nullable: false),
+                    Role = table.Column<string>(type: "TEXT", maxLength: 20, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -95,24 +98,6 @@ namespace RPGForum.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Personagens", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Utilizadores",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Username = table.Column<string>(type: "TEXT", maxLength: 30, nullable: false),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 150, nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: false),
-                    Role = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    IdentityUserName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Utilizadores", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -227,29 +212,29 @@ namespace RPGForum.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    UtilizadorID = table.Column<int>(type: "INTEGER", nullable: false),
+                    UtilizadorID = table.Column<string>(type: "TEXT", nullable: false),
                     CharacterId = table.Column<int>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "TEXT", maxLength: 2500, nullable: true),
                     Level = table.Column<int>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
                     CharClassId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Builds", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Builds_Personagens_CharClassId",
-                        column: x => x.CharClassId,
-                        principalTable: "Personagens",
+                        name: "FK_Builds_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Builds_Utilizadores_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Utilizadores",
+                        name: "FK_Builds_Personagens_CharClassId",
+                        column: x => x.CharClassId,
+                        principalTable: "Personagens",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -311,7 +296,7 @@ namespace RPGForum.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     BuildId = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
                     ParentId = table.Column<int>(type: "INTEGER", nullable: true),
                     Content = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
@@ -319,6 +304,12 @@ namespace RPGForum.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Comentario", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Comentario_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Comentario_Builds_BuildId",
                         column: x => x.BuildId,
@@ -329,12 +320,6 @@ namespace RPGForum.Migrations
                         name: "FK_Comentario_Comentario_ParentId",
                         column: x => x.ParentId,
                         principalTable: "Comentario",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Comentario_Utilizadores_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Utilizadores",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -371,24 +356,24 @@ namespace RPGForum.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     BuildId = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
                     CretatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Gostos", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Gostos_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Gostos_Builds_BuildId",
                         column: x => x.BuildId,
                         principalTable: "Builds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Gostos_Utilizadores_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Utilizadores",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
@@ -398,8 +383,8 @@ namespace RPGForum.Migrations
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "admin", 0, "fe626d10-17f8-4768-8818-895627758300", "admin@mail.pt", true, false, null, "ADMIN@MAIL.PT", "ADMIN@MAIL.PT", "AQAAAAEAACcQAAAAEHX9OhBfKGUsbLTayhBCZ3WRcp+X+ivBA00sBQI5YG2NPaVbTJsVKE9jOgm/4Sb2RQ==", null, false, "1bcbd0a7-5c9d-4510-811a-cd5eee6c0dbe", false, "admin@mail.pt" });
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedAt", "Discriminator", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[] { "admin", 0, "fe626d10-17f8-4768-8818-895627758300", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Utilizadores", "admin@mail.pt", true, false, null, "ADMIN@MAIL.PT", "ADMIN@MAIL.PT", "AQAAAAEAACcQAAAAEHX9OhBfKGUsbLTayhBCZ3WRcp+X+ivBA00sBQI5YG2NPaVbTJsVKE9jOgm/4Sb2RQ==", null, false, "Administrator", "1bcbd0a7-5c9d-4510-811a-cd5eee6c0dbe", false, "admin@mail.pt" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
@@ -494,18 +479,6 @@ namespace RPGForum.Migrations
                 name: "IX_Gostos_UserId",
                 table: "Gostos",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Utilizadores_Email",
-                table: "Utilizadores",
-                column: "Email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Utilizadores_Username",
-                table: "Utilizadores",
-                column: "Username",
-                unique: true);
         }
 
         /// <inheritdoc />
@@ -545,9 +518,6 @@ namespace RPGForum.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Acessorios");
 
             migrationBuilder.DropTable(
@@ -557,10 +527,10 @@ namespace RPGForum.Migrations
                 name: "Builds");
 
             migrationBuilder.DropTable(
-                name: "Personagens");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Utilizadores");
+                name: "Personagens");
         }
     }
 }

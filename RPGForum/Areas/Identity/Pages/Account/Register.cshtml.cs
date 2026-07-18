@@ -26,18 +26,18 @@ namespace RPGForum.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly IUserStore<IdentityUser> _userStore;
-        private readonly IUserEmailStore<IdentityUser> _emailStore;
+        private readonly SignInManager<Utilizadores> _signInManager;
+        private readonly UserManager<Utilizadores> _userManager;
+        private readonly IUserStore<Utilizadores> _userStore;
+        private readonly IUserEmailStore<Utilizadores> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly ApplicationDbContext _context;
 
         public RegisterModel(
-            UserManager<IdentityUser> userManager,
-            IUserStore<IdentityUser> userStore,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<Utilizadores> userManager,
+            IUserStore<Utilizadores> userStore,
+            SignInManager<Utilizadores> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
             ApplicationDbContext context)
@@ -93,9 +93,10 @@ namespace RPGForum.Areas.Identity.Pages.Account
             public string Password { get; set; } = string.Empty;
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirmar Senha")]
-            [Compare("Password", ErrorMessage = "A senha e a confirmação de senha não coincidem.")]
-            public string ConfirmPassword { get; set; } = string.Empty;
+            [Display(Name = "Confirm password")]
+            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            public string ConfirmPassword { get; set; }
+            
         }
 
 
@@ -120,7 +121,7 @@ namespace RPGForum.Areas.Identity.Pages.Account
                 }
 
                 // Verificar se o nome de utilizador já está em uso na tabela Utilizadores
-                var usernameExists = await _context.Utilizadores.AnyAsync(u => u.Username == Input.Username);
+                var usernameExists = await _context.Utilizadores.AnyAsync(u => u.UserName == Input.Username);
                 if (usernameExists)
                 {
                     ModelState.AddModelError("Input.Username", "Este nome de utilizador já está em uso.");
@@ -187,27 +188,27 @@ namespace RPGForum.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private IdentityUser CreateUser()
+        private Utilizadores CreateUser()
         {
             try
             {
-                return Activator.CreateInstance<IdentityUser>();
+                return Activator.CreateInstance<Utilizadores>();
             }
             catch
             {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(IdentityUser)}'. " +
-                    $"Ensure that '{nameof(IdentityUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+                throw new InvalidOperationException($"Can't create an instance of '{nameof(Utilizadores)}'. " +
+                    $"Ensure that '{nameof(Utilizadores)}' is not an abstract class and has a parameterless constructor, or alternatively " +
                     $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
             }
         }
 
-        private IUserEmailStore<IdentityUser> GetEmailStore()
+        private IUserEmailStore<Utilizadores> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
-            return (IUserEmailStore<IdentityUser>)_userStore;
+            return (IUserEmailStore<Utilizadores>)_userStore;
         }
     }
 }

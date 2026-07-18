@@ -23,7 +23,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
         [BindProperty]
         public Models.Utilizadores Utilizador { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
@@ -43,7 +43,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int? id)
+        public async Task<IActionResult> OnPostAsync(string? id)
         {
             if (id == null)
             {
@@ -75,7 +75,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
                 _context.Utilizadores.Remove(utilizador);
                 await _context.SaveChangesAsync();
 
-                TempData["Sucesso"] = $"Utilizador \"{utilizador.Username}\" eliminado com sucesso!";
+                TempData["Sucesso"] = $"Utilizador \"{utilizador.UserName}\" eliminado com sucesso!";
             }
 
             return RedirectToPage("./Index");

@@ -6,23 +6,27 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace RPGForum.Pages.Builds
+namespace RPGForum.Pages.Build
 {
     [Authorize]
     public class CreateModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Models.Utilizadores> _userManager;
 
-        public CreateModel(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public CreateModel(ApplicationDbContext context, UserManager<Models.Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
         [BindProperty]
-        public BuildPost Build { get; set; } = new();
+        public Models.Build Build { get; set; } = new();
 
         [BindProperty]
         public Estatisticas Stats { get; set; } = new();
@@ -57,7 +61,7 @@ namespace RPGForum.Pages.Builds
                 return Page();
             }
 
-            var utilizador = await ObterOuCriarUtilizadorAsync();
+            var utilizador = await _userManager.GetUserAsync(User);
             if (utilizador == null)
             {
                 ModelState.AddModelError("", "Erro ao identificar o utilizador. Por favor tente novamente.");
@@ -120,31 +124,5 @@ namespace RPGForum.Pages.Builds
             TodasArmas = await _context.Armas.OrderBy(a => a.Name).ToListAsync();
             TodosAcessorios = await _context.Acessorios.OrderBy(a => a.Name).ToListAsync();
         }
-
-        private async Task<Utilizadores?> ObterOuCriarUtilizadorAsync()
-        {
-            var identityUser = await _userManager.GetUserAsync(User);
-            if (identityUser == null) return null;
-
-            var utilizador = await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
-
-            if (utilizador == null)
-            {
-                utilizador = new Utilizadores
-                {
-                    Username = identityUser.UserName!.Split('@')[0],
-                    Email = identityUser.Email!,
-                    Password = "",
-                    IdentityUserName = identityUser.UserName,
-                    Role = "Registered"
-                };
-                _context.Utilizadores.Add(utilizador);
-                await _context.SaveChangesAsync();
-            }
-
-            return utilizador;
-        }
     }
-
 }

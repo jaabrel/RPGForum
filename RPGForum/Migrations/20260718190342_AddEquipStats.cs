@@ -11,11 +11,11 @@ namespace RPGForum.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Builds_Personagens_CharClassId",
+                name: "FK_Builds_AspNetUsers_UserId",
                 table: "Builds");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Builds_Utilizadores_UserId",
+                name: "FK_Builds_Personagens_CharClassId",
                 table: "Builds");
 
             migrationBuilder.DropIndex(
@@ -69,18 +69,18 @@ namespace RPGForum.Migrations
                 column: "UtilizadorID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Builds_Personagens_CharacterId",
+                name: "FK_Builds_AspNetUsers_UtilizadorID",
                 table: "Builds",
-                column: "CharacterId",
-                principalTable: "Personagens",
+                column: "UtilizadorID",
+                principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Builds_Utilizadores_UtilizadorID",
+                name: "FK_Builds_Personagens_CharacterId",
                 table: "Builds",
-                column: "UtilizadorID",
-                principalTable: "Utilizadores",
+                column: "CharacterId",
+                principalTable: "Personagens",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
         }
@@ -89,11 +89,11 @@ namespace RPGForum.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Builds_Personagens_CharacterId",
+                name: "FK_Builds_AspNetUsers_UtilizadorID",
                 table: "Builds");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Builds_Utilizadores_UtilizadorID",
+                name: "FK_Builds_Personagens_CharacterId",
                 table: "Builds");
 
             migrationBuilder.DropIndex(
@@ -127,12 +127,12 @@ namespace RPGForum.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<string>(
                 name: "UserId",
                 table: "Builds",
-                type: "INTEGER",
+                type: "TEXT",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Builds_CharClassId",
@@ -145,18 +145,18 @@ namespace RPGForum.Migrations
                 column: "UserId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Builds_Personagens_CharClassId",
+                name: "FK_Builds_AspNetUsers_UserId",
                 table: "Builds",
-                column: "CharClassId",
-                principalTable: "Personagens",
+                column: "UserId",
+                principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Builds_Utilizadores_UserId",
+                name: "FK_Builds_Personagens_CharClassId",
                 table: "Builds",
-                column: "UserId",
-                principalTable: "Utilizadores",
+                column: "CharClassId",
+                principalTable: "Personagens",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
         }

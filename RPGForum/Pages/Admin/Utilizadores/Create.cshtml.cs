@@ -16,9 +16,9 @@ namespace RPGForum.Pages.Admin.Utilizadores
     public class CreateModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Models.Utilizadores> _userManager;
 
-        public CreateModel(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public CreateModel(ApplicationDbContext context, UserManager<Models.Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -70,7 +70,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
             }
 
             // Validar username duplicado
-            var usernameExists = await _context.Utilizadores.AnyAsync(u => u.Username == Input.Username);
+            var usernameExists = await _context.Utilizadores.AnyAsync(u => u.UserName == Input.Username);
             if (usernameExists)
             {
                 ModelState.AddModelError("Input.Username", "Este nome de utilizador já está em uso.");
@@ -78,33 +78,22 @@ namespace RPGForum.Pages.Admin.Utilizadores
             }
 
             // Criar utilizador no ASP.NET Identity
-            var user = new IdentityUser();
-            user.UserName = Input.Email;
-            user.Email = Input.Email;
-            user.EmailConfirmed = true; // Criado pelo admin, fica confirmado de imediato
+            var user = new Models.Utilizadores
+            {
+                UserName = Input.Username,
+                Email = Input.Email,
+                EmailConfirmed = true,
+                Role = Input.Role,
+                CreatedAt = DateTime.UtcNow
+            };
 
             var result = await _userManager.CreateAsync(user, Input.Password);
             if (result.Succeeded)
             {
-                // Associar Role no Identity se necessário
-                if (Input.Role == "Administrator" || Input.Role == "Manager")
+                if (Input.Role == "Administrator")
                 {
                     await _userManager.AddToRoleAsync(user, Input.Role);
                 }
-
-                // Criar utilizador na tabela Utilizadores
-                var utilizador = new Models.Utilizadores
-                {
-                    Username = Input.Username,
-                    Email = Input.Email,
-                    Password = "", // PasswordHash é gerido pelo Identity
-                    Role = Input.Role,
-                    CreatedAt = DateTime.UtcNow,
-                    IdentityUserName = Input.Email
-                };
-
-                _context.Utilizadores.Add(utilizador);
-                await _context.SaveChangesAsync();
 
                 TempData["Sucesso"] = $"Utilizador \"{Input.Username}\" criado com sucesso!";
                 return RedirectToPage("./Index");

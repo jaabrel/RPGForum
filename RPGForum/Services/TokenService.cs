@@ -1,11 +1,14 @@
-using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
 
-namespace RPGForum.Services.Jwt
+namespace RPGForum.Services
 {
+    /// <summary>
+    /// Classe responsável por gerar o token JWT para um utilizador autenticado
+    /// </summary>
     public class TokenService
     {
         private readonly IConfiguration _config;

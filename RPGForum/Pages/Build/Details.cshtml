@@ -1,5 +1,5 @@
 @page "{id:int}"
-@model RPGForum.Pages.Builds.DetailsModel
+@model RPGForum.Pages.Build.DetailsModel
 @{
     ViewData["Title"] = Model.Build.Title;
     var build = Model.Build;
@@ -18,7 +18,7 @@
     <div>
         <h1 class="h2 mb-1">@build.Title</h1>
         <div class="d-flex flex-wrap gap-2 align-items-center text-muted small">
-            <span>por <strong>@build.User?.Username</strong></span>
+            <span>por <strong>@build.User?.UserName</strong></span>
             <span>·</span>
             <span class="badge bg-secondary">@build.CharClass?.Name</span>
             <span class="badge bg-primary">Nível @build.Level</span>
@@ -63,7 +63,7 @@
                     @foreach (var bw in build.BuidWeapons)
                     {
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>@bw.Weapon?.Name</span>
+                             <span>@bw.Weapon?.Name</span>
                             @if (!string.IsNullOrEmpty(bw.Weapon?.Type))
                             {
                                 <span class="badge bg-light text-dark border">@bw.Weapon.Type</span>
@@ -83,7 +83,7 @@
                     @foreach (var ba in build.BuildAccessories.OrderBy(ba => ba.SlotPosition))
                     {
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>@ba.Accessory?.Name</span>
+                             <span>@ba.Accessory?.Name</span>
                             @if (!string.IsNullOrEmpty(ba.Accessory?.Type))
                             {
                                 <span class="badge bg-light text-dark border">@ba.Accessory.Type</span>
@@ -186,7 +186,7 @@
 
                                 <!-- Cabeçalho do comentário -->
                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <strong class="small">@comentario.User?.Username</strong>
+                                    <strong class="small">@comentario.User?.UserName</strong>
                                     <div class="d-flex align-items-center gap-2">
                                         <small class="text-muted">
                                             @comentario.CreatedAt.ToString("dd/MM/yyyy HH:mm")
@@ -220,7 +220,7 @@
                                         {
                                             <div class="mb-2" id="comentario-@resposta.Id">
                                                 <div class="d-flex justify-content-between align-items-start">
-                                                    <strong class="small">@resposta.User?.Username</strong>
+                                                    <strong class="small">@resposta.User?.UserName</strong>
                                                     <div class="d-flex align-items-center gap-2">
                                                         <small class="text-muted">
                                                             @resposta.CreatedAt.ToString("dd/MM/yyyy HH:mm")
@@ -264,9 +264,9 @@
                                                        value="@comentario.Id" />
                                                 <div class="mb-2">
                                                     <textarea name="Conteudo" class="form-control form-control-sm"
-                                                              rows="2"
-                                                              placeholder="A tua resposta..."
-                                                              maxlength="2000" required></textarea>
+                                                               rows="2"
+                                                               placeholder="A tua resposta..."
+                                                               maxlength="2000" required></textarea>
                                                 </div>
                                                 <div class="d-flex gap-2">
                                                     <button type="submit"
@@ -503,7 +503,7 @@
 
         // Configuração do Cliente SignalR
         const buildId = @build.Id;
-        const currentUsername = '@(utilizadorAtual?.Username ?? "")';
+        const currentUsername = '@(utilizadorAtual?.UserName ?? "")';
 
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/commentsHub")
@@ -581,19 +581,6 @@
                 const containerEl = document.getElementById(`respostas-container-${data.parentId}`);
                 if (containerEl) {
                     containerEl.insertAdjacentHTML('beforeend', respostaHtml);
-                }
-            }
-        });
-
-        // Intercetar submissão do formulário para avisar outros clientes via SignalR
-        document.addEventListener('submit', function (e) {
-            if (e.target && e.target.id === 'form-comentario-raiz') {
-                const input = document.getElementById('input-comentario-raiz');
-                if (input && input.value.trim() !== '') {
-                    // O SignalR enviará após o post carregar ou, se usássemos AJAX, imediatamente.
-                    // Para Razor Pages tradicional, o submit faz POST completo. O SignalR avisará a partir do Hub no servidor (ou fazemos trigger).
-                    // Para garantir tempo real perfeito, o ideal é o próprio controlador do servidor disparar a notificação SignalR.
-                    // Adicionamos no Hub também caso queiram chamar client-side.
                 }
             }
         });

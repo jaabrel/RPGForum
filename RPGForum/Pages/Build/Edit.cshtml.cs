@@ -6,23 +6,27 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace RPGForum.Pages.Builds
+namespace RPGForum.Pages.Build
 {
     [Authorize]
     public class EditModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Models.Utilizadores> _userManager;
 
-        public EditModel(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public EditModel(ApplicationDbContext context, UserManager<Models.Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
         [BindProperty]
-        public BuildPost Build { get; set; } = null!;
+        public Models.Build Build { get; set; } = null!;
 
         [BindProperty]
         public Estatisticas Stats { get; set; } = null!;
@@ -154,14 +158,9 @@ namespace RPGForum.Pages.Builds
             TodosAcessorios = await _context.Acessorios.OrderBy(a => a.Name).ToListAsync();
         }
 
-        private async Task<Utilizadores?> ObterUtilizadorAtualAsync()
+        private async Task<Models.Utilizadores?> ObterUtilizadorAtualAsync()
         {
-            var identityUser = await _userManager.GetUserAsync(User);
-            if (identityUser == null) return null;
-
-            return await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
+            return await _userManager.GetUserAsync(User);
         }
     }
-
 }

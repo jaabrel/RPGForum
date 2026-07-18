@@ -8,10 +8,6 @@
     <div class="col-md-6">
         <div class="glass-card p-5">
             <div class="mb-4 text-center">
-                @if (!string.IsNullOrEmpty(Model.Acessorio.ImageUrl))
-                {
-                    <img src="@Model.Acessorio.ImageUrl" alt="@Model.Acessorio.Name" class="img-thumbnail rounded-circle mb-3 shadow" style="height: 120px; width: 120px; object-fit: cover;" />
-                }
                 <h2 class="title fw-black">@Model.Acessorio.Name</h2>
                 <span class="badge bg-secondary mb-2 fs-6">@Model.Acessorio.Type</span>
                 <p class="text-muted">Detalhes do Acessório Registado</p>
@@ -31,9 +27,6 @@
                     <dd class="col-sm-8">
                         <span class="badge bg-secondary">@Model.Acessorio.Type</span>
                     </dd>
-
-                    <dt class="col-sm-4 text-muted">URL da Imagem</dt>
-                    <dd class="col-sm-8 text-truncate small"><a href="@Model.Acessorio.ImageUrl" target="_blank">@Model.Acessorio.ImageUrl</a></dd>
                 </dl>
             </div>
 
@@ -66,7 +59,7 @@
                             @for (int i = 0; i < Math.Min(stats.Length, bonuses.Length); i++)
                             {
                                 <li>
-                                    <span class="badge bg-success me-2">+@bonuses[i]</span>
+                                    <span class="badge bg-success me-2">@((int.Parse(bonuses[i]) > 0 ? "+" : ""))@bonuses[i]</span>
                                     <strong>@stats[i]</strong>
                                 </li>
                             }

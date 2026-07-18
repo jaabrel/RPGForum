@@ -1,5 +1,5 @@
 @page
-@model RPGForum.Pages.Builds.IndexModel
+@model RPGForum.Pages.Build.IndexModel
 @{
     ViewData["Title"] = "As minhas Builds";
 }
@@ -7,7 +7,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>🛡️ As minhas Builds</h2>
-        <a asp-page="/Builds/Create" class="btn btn-primary">
+        <a asp-page="/Build/Create" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Criar Nova Build
         </a>
     </div>
@@ -41,7 +41,7 @@
                             <tr>
                                 <td colspan="7" class="text-center py-5 text-muted">
                                     <p class="mb-2">Ainda não criaste nenhuma build.</p>
-                                    <a asp-page="/Builds/Create" class="btn btn-sm btn-outline-primary">Criar a tua primeira build</a>
+                                    <a asp-page="/Build/Create" class="btn btn-sm btn-outline-primary">Criar a tua primeira build</a>
                                 </td>
                             </tr>
                         }

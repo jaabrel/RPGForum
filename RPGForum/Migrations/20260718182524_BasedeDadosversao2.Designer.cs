@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RPGForum.Data;
 
@@ -10,9 +11,11 @@ using RPGForum.Data;
 namespace RPGForum.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260718182524_BasedeDadosversao2")]
+    partial class BasedeDadosversao2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -257,12 +260,6 @@ namespace RPGForum.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("StatAfetada")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("StatBonus")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Type")
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
@@ -290,12 +287,6 @@ namespace RPGForum.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("StatAfetada")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("StatBonus")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Type")
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
@@ -309,6 +300,9 @@ namespace RPGForum.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CharClassId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("CharacterId")
@@ -332,15 +326,19 @@ namespace RPGForum.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("UtilizadorID")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CharacterId");
+                    b.HasIndex("CharClassId");
 
-                    b.HasIndex("UtilizadorID");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Builds");
                 });
@@ -591,13 +589,13 @@ namespace RPGForum.Migrations
                 {
                     b.HasOne("RPGForum.Models.Personagens", "CharClass")
                         .WithMany("Builds")
-                        .HasForeignKey("CharacterId")
+                        .HasForeignKey("CharClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RPGForum.Models.Utilizadores", "User")
                         .WithMany("Builds")
-                        .HasForeignKey("UtilizadorID")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

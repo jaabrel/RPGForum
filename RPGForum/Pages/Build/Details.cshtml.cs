@@ -5,25 +5,26 @@ using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 
-namespace RPGForum.Pages.Builds
+namespace RPGForum.Pages.Build
 {
     public class DetailsModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Models.Utilizadores> _userManager;
 
-        public DetailsModel(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public DetailsModel(ApplicationDbContext context, UserManager<Models.Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
         // --- Dados da página ---
-        public BuildPost Build { get; set; } = null!;
+        public Models.Build Build { get; set; } = null!;
         public bool IsAutor { get; set; }
         public bool JaDeuGosto { get; set; }
-        public Utilizadores? UtilizadorAtual { get; set; }
+        public Models.Utilizadores? UtilizadorAtual { get; set; }
 
         // --- Formulário de comentário ---
         [BindProperty]
@@ -47,7 +48,6 @@ namespace RPGForum.Pages.Builds
         }
 
         // --- POST: Dar / Retirar Gosto ---
-        // Removido [Authorize] do handler (Aviso MVC1001 resolvido). A segurança é validada imperativamente.
         public async Task<IActionResult> OnPostGostoAsync(int id)
         {
             var utilizador = await ObterUtilizadorAtualAsync();
@@ -83,7 +83,6 @@ namespace RPGForum.Pages.Builds
         }
 
         // --- POST: Comentar (novo ou resposta) ---
-        // Removido [Authorize] do handler (Aviso MVC1001 resolvido). A segurança é validada imperativamente.
         public async Task<IActionResult> OnPostComentarAsync(int id)
         {
             var utilizador = await ObterUtilizadorAtualAsync();
@@ -106,7 +105,7 @@ namespace RPGForum.Pages.Builds
             // Se for resposta, validar que o comentário pai existe e pertence a esta build
             if (CommentParentId.HasValue)
             {
-                var pai = await _context.Comentario
+                var pai = await _context.Comentarios
                     .FirstOrDefaultAsync(c => c.Id == CommentParentId.Value && c.BuildId == id);
                 if (pai == null) CommentParentId = null; // Pai inválido → tratar como raiz
             }
@@ -120,7 +119,7 @@ namespace RPGForum.Pages.Builds
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Comentario.Add(comentario);
+            _context.Comentarios.Add(comentario);
             await _context.SaveChangesAsync();
 
             // Redirecionar de volta à página com âncora para os comentários
@@ -128,13 +127,12 @@ namespace RPGForum.Pages.Builds
         }
 
         // --- POST: Apagar Comentário ---
-        // Removido [Authorize] do handler (Aviso MVC1001 resolvido). A segurança é validada imperativamente.
         public async Task<IActionResult> OnPostApagarComentarioAsync(int id, int comentarioId)
         {
             var utilizador = await ObterUtilizadorAtualAsync();
             if (utilizador == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            var comentario = await _context.Comentario
+            var comentario = await _context.Comentarios
                 .FirstOrDefaultAsync(c => c.Id == comentarioId && c.BuildId == id);
 
             if (comentario == null) return NotFound();
@@ -143,7 +141,7 @@ namespace RPGForum.Pages.Builds
             if (comentario.UserId != utilizador.Id && !User.IsInRole("Administrator"))
                 return Forbid();
 
-            _context.Comentario.Remove(comentario);
+            _context.Comentarios.Remove(comentario);
             await _context.SaveChangesAsync();
 
             return RedirectToPage(pageName: null, pageHandler: null, new { id }, fragment: "comentarios");
@@ -151,7 +149,7 @@ namespace RPGForum.Pages.Builds
 
         // --- Helpers privados ---
 
-        private async Task<BuildPost?> CarregarBuildAsync(int id)
+        private async Task<Models.Build?> CarregarBuildAsync(int id)
         {
             return await _context.Builds
                 .Include(b => b.User)
@@ -181,13 +179,9 @@ namespace RPGForum.Pages.Builds
             JaDeuGosto = Build.Likes.Any(l => l.UserId == UtilizadorAtual.Id);
         }
 
-        private async Task<Utilizadores?> ObterUtilizadorAtualAsync()
+        private async Task<Models.Utilizadores?> ObterUtilizadorAtualAsync()
         {
-            var identityUser = await _userManager.GetUserAsync(User);
-            if (identityUser == null) return null;
-
-            return await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.IdentityUserName == identityUser.UserName);
+            return await _userManager.GetUserAsync(User);
         }
     }
 }

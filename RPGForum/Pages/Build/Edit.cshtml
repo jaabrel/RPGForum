@@ -1,7 +1,7 @@
-@page
-@model RPGForum.Pages.Builds.CreateModel
+@page "{id:int}"
+@model RPGForum.Pages.Build.EditModel
 @{
-    ViewData["Title"] = "Nova Build";
+    ViewData["Title"] = "Editar Build";
 }
 
 <div class="row justify-content-center">
@@ -10,42 +10,42 @@
         <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a asp-page="Index">As Minhas Builds</a></li>
-                <li class="breadcrumb-item active">Nova Build</li>
+                <li class="breadcrumb-item active">Editar</li>
             </ol>
         </nav>
 
-        <h1 class="h2 mb-4">Criar Nova Build</h1>
+        <h1 class="h2 mb-4">Editar Build</h1>
 
-        <form method="post">
+        <form method="post" asp-route-id="@Model.Build.Id">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
             <!-- Informação principal -->
             <div class="card mb-4">
-                <div class="card-header bg-dark text-white fw-semibold">Informação Principal</div>
+                <div class="card-header fw-semibold">Informação Principal</div>
                 <div class="card-body">
 
                     <div class="mb-3">
-                        <label asp-for="Build.Title" class="form-label fw-bold">Título <span class="text-danger">*</span></label>
-                        <input asp-for="Build.Title" class="form-control" placeholder="Dá um nome chamativo à tua build..." />
+                        <label asp-for="Build.Title" class="form-label">Título <span class="text-danger">*</span></label>
+                        <input asp-for="Build.Title" class="form-control" />
                         <span asp-validation-for="Build.Title" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Build.Description" class="form-label fw-bold">Descrição</label>
-                        <textarea asp-for="Build.Description" class="form-control" rows="4" placeholder="Explica como jogar com esta build, rotação de habilidades, etc..."></textarea>
+                        <label asp-for="Build.Description" class="form-label">Descrição</label>
+                        <textarea asp-for="Build.Description" class="form-control" rows="4"></textarea>
                         <span asp-validation-for="Build.Description" class="text-danger small"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Build.CharacterId" class="form-label fw-bold">Personagem <span class="text-danger">*</span></label>
+                            <label asp-for="Build.CharacterId" class="form-label">Personagem <span class="text-danger">*</span></label>
                             <select asp-for="Build.CharacterId" asp-items="Model.PersonagensSelect" class="form-select">
                                 <option value="">-- Seleciona uma personagem --</option>
                             </select>
                             <span asp-validation-for="Build.CharacterId" class="text-danger small"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Build.Level" class="form-label fw-bold">Nível (1-100)</label>
+                            <label asp-for="Build.Level" class="form-label">Nível (1-100)</label>
                             <input asp-for="Build.Level" class="form-control" type="number" min="1" max="100" />
                             <span asp-validation-for="Build.Level" class="text-danger small"></span>
                         </div>
@@ -55,32 +55,32 @@
 
             <!-- Estatísticas -->
             <div class="card mb-4">
-                <div class="card-header bg-dark text-white fw-semibold">Estatísticas Base</div>
+                <div class="card-header fw-semibold">Estatísticas Base</div>
                 <div class="card-body">
                     <div class="row row-cols-2 row-cols-md-3 g-3">
                         <div>
-                            <label asp-for="Stats.Hp" class="form-label fw-bold">HP</label>
-                            <input asp-for="Stats.Hp" class="form-control" type="number" min="1" value="10" />
+                            <label asp-for="Stats.Hp" class="form-label">HP</label>
+                            <input asp-for="Stats.Hp" class="form-control" type="number" min="1" />
                         </div>
                         <div>
-                            <label asp-for="Stats.Strength" class="form-label fw-bold">Força</label>
-                            <input asp-for="Stats.Strength" class="form-control" type="number" min="1" value="10" />
+                            <label asp-for="Stats.Strength" class="form-label">Força</label>
+                            <input asp-for="Stats.Strength" class="form-control" type="number" min="1" />
                         </div>
                         <div>
-                            <label asp-for="Stats.Defense" class="form-label fw-bold">Defesa</label>
-                            <input asp-for="Stats.Defense" class="form-control" type="number" min="1" value="10" />
+                            <label asp-for="Stats.Defense" class="form-label">Defesa</label>
+                            <input asp-for="Stats.Defense" class="form-control" type="number" min="1" />
                         </div>
                         <div>
-                            <label asp-for="Stats.Magic" class="form-label fw-bold">Magia</label>
-                            <input asp-for="Stats.Magic" class="form-control" type="number" min="1" value="10" />
+                            <label asp-for="Stats.Magic" class="form-label">Magia</label>
+                            <input asp-for="Stats.Magic" class="form-control" type="number" min="1" />
                         </div>
                         <div>
-                            <label asp-for="Stats.Endurance" class="form-label fw-bold">Resistência</label>
-                            <input asp-for="Stats.Endurance" class="form-control" type="number" min="1" value="10" />
+                            <label asp-for="Stats.Endurance" class="form-label">Resistência</label>
+                            <input asp-for="Stats.Endurance" class="form-control" type="number" min="1" />
                         </div>
                         <div>
-                            <label asp-for="Stats.Speed" class="form-label fw-bold">Velocidade</label>
-                            <input asp-for="Stats.Speed" class="form-control" type="number" min="1" value="10" />
+                            <label asp-for="Stats.Speed" class="form-label">Velocidade</label>
+                            <input asp-for="Stats.Speed" class="form-control" type="number" min="1" />
                         </div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
             @if (Model.TodasArmas.Any())
             {
                 <div class="card mb-4">
-                    <div class="card-header bg-dark text-white fw-semibold">Armas da Build</div>
+                    <div class="card-header fw-semibold">Armas</div>
                     <div class="card-body">
                         <div class="row row-cols-2 row-cols-md-3 g-2">
                             @foreach (var arma in Model.TodasArmas)
@@ -98,8 +98,9 @@
                                 <div class="col">
                                     <div class="form-check">
                                         <input type="checkbox" name="ArmasSelecionadas" value="@arma.Id"
-                                               class="form-check-input" id="arma_@arma.Id" />
-                                        <label class="form-check-label text-truncate" style="max-width: 100%;" for="arma_@arma.Id" title="@arma.Name">
+                                               class="form-check-input" id="arma_@arma.Id"
+                                        @(Model.ArmasSelecionadas.Contains(arma.Id) ? "checked" : "") />
+                                        <label class="form-check-label" for="arma_@arma.Id">
                                             @arma.Name
                                             @if (!string.IsNullOrEmpty(arma.Type))
                                             {
@@ -118,7 +119,7 @@
             @if (Model.TodosAcessorios.Any())
             {
                 <div class="card mb-4">
-                    <div class="card-header bg-dark text-white fw-semibold">Acessórios da Build</div>
+                    <div class="card-header fw-semibold">Acessórios</div>
                     <div class="card-body">
                         <div class="row row-cols-2 row-cols-md-3 g-2">
                             @foreach (var acessorio in Model.TodosAcessorios)
@@ -126,8 +127,9 @@
                                 <div class="col">
                                     <div class="form-check">
                                         <input type="checkbox" name="AcessoriosSelecionados" value="@acessorio.Id"
-                                               class="form-check-input" id="acess_@acessorio.Id" />
-                                        <label class="form-check-label text-truncate" style="max-width: 100%;" for="acess_@acessorio.Id" title="@acessorio.Name">
+                                               class="form-check-input" id="acess_@acessorio.Id"
+                                        @(Model.AcessoriosSelecionados.Contains(acessorio.Id) ? "checked" : "") />
+                                        <label class="form-check-label" for="acess_@acessorio.Id">
                                             @acessorio.Name
                                             @if (!string.IsNullOrEmpty(acessorio.Type))
                                             {
@@ -142,9 +144,9 @@
                 </div>
             }
 
-            <div class="d-flex gap-2 justify-content-between mt-4">
+            <div class="d-flex gap-2 justify-content-end">
                 <a asp-page="Index" class="btn btn-outline-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-primary px-4">Criar Build</button>
+                <button type="submit" class="btn btn-primary">Guardar Alterações</button>
             </div>
         </form>
 
@@ -152,5 +154,7 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
