@@ -97,49 +97,38 @@ namespace RPGForum.Pages.Admin.Utilizadores
                 return Page();
             }
 
-            // Procurar IdentityUser correspondente pelo e-mail antigo
-            var identityUser = await _userManager.FindByEmailAsync(utilizador.Email);
-            if (identityUser != null)
+            // Atualizar e-mail e username do IdentityUser se mudou
+            if (utilizador.Email != Input.Email)
             {
-                // Atualizar e-mail e username do IdentityUser se mudou
-                if (identityUser.Email != Input.Email)
-                {
-                    identityUser.Email = Input.Email;
-                    identityUser.UserName = Input.Email;
-                    identityUser.NormalizedEmail = Input.Email.ToUpper();
-                    identityUser.NormalizedUserName = Input.Email.ToUpper();
-                }
-
-                var updateResult = await _userManager.UpdateAsync(identityUser);
-                if (!updateResult.Succeeded)
-                {
-                    foreach (var error in updateResult.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                    return Page();
-                }
-
-                // Sincronizar as Roles no Identity
-                var currentRoles = await _userManager.GetRolesAsync(identityUser);
-                if (currentRoles.Any())
-                {
-                    await _userManager.RemoveFromRolesAsync(identityUser, currentRoles);
-                }
-
-                if (Input.Role == "Administrator" || Input.Role == "Manager")
-                {
-                    await _userManager.AddToRoleAsync(identityUser, Input.Role);
-                }
+                utilizador.Email = Input.Email;
+                utilizador.NormalizedEmail = Input.Email.ToUpper();
             }
 
-            // Atualizar na tabela Utilizadores
             utilizador.UserName = Input.Username;
-            utilizador.Email = Input.Email;
+            utilizador.NormalizedUserName = Input.Username.ToUpper();
             utilizador.Role = Input.Role;
 
-            _context.Attach(utilizador).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            var updateResult = await _userManager.UpdateAsync(utilizador);
+            if (!updateResult.Succeeded)
+            {
+                foreach (var error in updateResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return Page();
+            }
+
+            // Sincronizar as Roles no Identity
+            var currentRoles = await _userManager.GetRolesAsync(utilizador);
+            if (currentRoles.Any())
+            {
+                await _userManager.RemoveFromRolesAsync(utilizador, currentRoles);
+            }
+
+            if (Input.Role == "Administrator" || Input.Role == "Manager")
+            {
+                await _userManager.AddToRoleAsync(utilizador, Input.Role);
+            }
 
             TempData["Sucesso"] = $"Utilizador \"{Input.Username}\" atualizado com sucesso!";
             return RedirectToPage("./Index");

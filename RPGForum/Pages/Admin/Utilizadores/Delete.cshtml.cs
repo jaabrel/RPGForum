@@ -64,16 +64,16 @@ namespace RPGForum.Pages.Admin.Utilizadores
 
                 Utilizador = utilizador;
 
-                // Remover do ASP.NET Identity
-                var identityUser = await _userManager.FindByEmailAsync(utilizador.Email);
-                if (identityUser != null)
+                // Remover do ASP.NET Identity (que já remove da base de dados e trata de cascata)
+                var result = await _userManager.DeleteAsync(utilizador);
+                if (!result.Succeeded)
                 {
-                    await _userManager.DeleteAsync(identityUser);
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return Page();
                 }
-
-                // Remover da tabela Utilizadores (e em cascata builds/likes/comments se configurado)
-                _context.Utilizadores.Remove(utilizador);
-                await _context.SaveChangesAsync();
 
                 TempData["Sucesso"] = $"Utilizador \"{utilizador.UserName}\" eliminado com sucesso!";
             }
