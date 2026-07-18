@@ -6,28 +6,16 @@ namespace RPGForum.Models
 {
     public class Utilizadores
     {
-        public int Id { get; set; }
-
-        [Required, MaxLength(30)]
-        public string Username { get; set; } = string.Empty;
-
-        [Required, MaxLength(150), EmailAddressAttribute]
-        public string Email { get; set; } = string.Empty;
-
-        [Required]
-        public string Password { get; set; } = string.Empty;
-
+        /// <summary>
+        /// Role do Utilizador
+        /// </summary>
         [MaxLength(20)]
-        public string Role {  get; set; } = "Registered";
+        public string Role { get; set; } = "Registered";
 
         /// <summary>
-        ///
+        /// Data de criação do Utilizador
         /// </summary>
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-
-        [StringLength(50)]
-        public string? IdentityUserName { get; set; }
 
         public ICollection<BuildPost> Builds { get; set; } = new List<BuildPost>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
