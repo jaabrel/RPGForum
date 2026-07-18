@@ -12,13 +12,13 @@ namespace RPGForum.Areas.Identity.Pages.Account
 {
     public class ConfirmCodeModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<Utilizadores> _userManager;
+        private readonly SignInManager<Utilizadores> _signInManager;
         private readonly ApplicationDbContext _context;
 
         public ConfirmCodeModel(
-            UserManager<IdentityUser> userManager, 
-            SignInManager<IdentityUser> signInManager,
+            UserManager<Utilizadores> userManager, 
+            SignInManager<Utilizadores> signInManager,
             ApplicationDbContext context)
         {
             _userManager = userManager;
@@ -92,12 +92,10 @@ namespace RPGForum.Areas.Identity.Pages.Account
                 {
                     var utilizador = new Utilizadores
                     {
-                        Username = Input.Username,
+                        UserName = Input.Username,
                         Email = Input.Email,
-                        Password = "",
                         Role = "Registered",
                         CreatedAt = DateTime.UtcNow,
-                        IdentityUserName = Input.Email
                     };
 
                     _context.Utilizadores.Add(utilizador);

@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using RPGForum.Data;
 using RPGForum.Models;
+using RPGForum.Data;
 
-[ApiController]
 [Route("api/[controller]")]
+[ApiController]
 public class BuildsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -79,6 +80,7 @@ public class BuildsController : ControllerBase
 
         return NoContent();
     }
+
     public class BuildCreateDto
     {
         public string Title { get; set; }
@@ -159,7 +161,7 @@ public class BuildsController : ControllerBase
 
         var isAdmin = User.IsInRole("Administrator");
 
-        if (build.UtilizadorID != utilizador.Id || isAdmin)
+        if (build.UtilizadorID != utilizador.Id || isAdmin) 
         {
             return Forbid();
         }

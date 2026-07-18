@@ -15,7 +15,7 @@ namespace RPGForum.Pages
             _context = context;
         }
 
-        public IList<Build> Builds { get; set; } = new List<Build>();
+        public IList<Models.Build> Builds { get; set; } = new List<Models.Build>();
         public IList<Personagens> Personagens { get; set; } = new List<Personagens>();
 
         [BindProperty(SupportsGet = true)]

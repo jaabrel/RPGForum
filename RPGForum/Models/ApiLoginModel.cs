@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RPGForum.Models
@@ -11,7 +11,7 @@ namespace RPGForum.Models
         [Required(ErrorMessage = "O email é obrigatório")]
         [EmailAddress(ErrorMessage = "Formato de email inválido")]
         public string Email { get; set; } = string.Empty;
-
+        
         /// <summary>
         /// Senha do utilizador
         /// </summary>

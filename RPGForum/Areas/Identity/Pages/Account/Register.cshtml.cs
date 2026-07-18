@@ -93,9 +93,10 @@ namespace RPGForum.Areas.Identity.Pages.Account
             public string Password { get; set; } = string.Empty;
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirmar Senha")]
-            [Compare("Password", ErrorMessage = "A senha e a confirmação de senha não coincidem.")]
-            public string ConfirmPassword { get; set; } = string.Empty;
+            [Display(Name = "Confirm password")]
+            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            public string ConfirmPassword { get; set; }
+            
         }
 
 
@@ -120,7 +121,7 @@ namespace RPGForum.Areas.Identity.Pages.Account
                 }
 
                 // Verificar se o nome de utilizador já está em uso na tabela Utilizadores
-                var usernameExists = await _context.Utilizadores.AnyAsync(u => u.Username == Input.Username);
+                var usernameExists = await _context.Utilizadores.AnyAsync(u => u.UserName == Input.Username);
                 if (usernameExists)
                 {
                     ModelState.AddModelError("Input.Username", "Este nome de utilizador já está em uso.");

@@ -33,7 +33,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
 
             if (!string.IsNullOrEmpty(SearchString))
             {
-                query = query.Where(u => u.Username.Contains(SearchString) || u.Email.Contains(SearchString));
+                query = query.Where(u => u.UserName.Contains(SearchString) || u.Email.Contains(SearchString));
             }
 
             Utilizadores = await query.OrderByDescending(u => u.CreatedAt).ToListAsync();

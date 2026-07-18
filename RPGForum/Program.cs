@@ -1,8 +1,8 @@
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 using RPGForum.Data;
 using RPGForum.Models;
 using RPGForum.Hubs;
@@ -22,7 +22,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<Utilizadores>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -59,19 +59,21 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(10);
+    options.IdleTimeout = TimeSpan.FromSeconds(60);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
-builder.Services.AddDistributedMemoryCache();
-
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "chave-super-secreta-mesmo-chave-super-secreta-mesmo-chave-super-secreta-mesmo-chave-super-secreta-mesmo");
 
-
-builder.Services.AddAuthentication()
-    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+builder.Services.AddAuthentication(options => { })
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/Identity/Account/Login";
+        options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    })
+    .AddJwtBearer("Bearer", options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -79,12 +81,18 @@ builder.Services.AddAuthentication()
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["Issuer"] ?? "RPGForum",
-            ValidAudience = jwtSettings["Audience"] ?? "Os usuários do RPGForum",
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
 
+builder.Services.AddScoped<TokenService>();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options => 
+        options.JsonSerializerOptions.ReferenceHandler=ReferenceHandler.IgnoreCycles
+        );
 
 builder.Services.AddScoped<TokenService>();
 
@@ -115,13 +123,20 @@ app.UseStatusCodePagesWithRedirects("/Error/{0}");
 app.UseHttpsRedirection();
 
 app.UseRouting();
+
 app.UseSession();
+
 app.UseAuthentication();
+
 app.UseAuthorization();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapStaticAssets();
+
+app.MapControllers();
+
 app.MapRazorPages()
    .WithStaticAssets();
 

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RPGForum.Models
 {
@@ -6,12 +7,21 @@ namespace RPGForum.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey(nameof(Models.Build))]
+        /// <summary>
+        /// ID do build
+        /// </summary>
+        [ForeignKey(nameof(Build))]
         public int BuildId { get; set; }
 
+        /// <summary>
+        /// ID do utilizador
+        /// </summary>
         [ForeignKey(nameof(Utilizadores))]
-        public int UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Data de criação do like
+        /// </summary>
         public DateTime CretatedAt { get; set; } = DateTime.UtcNow;
 
         public Build Build { get; set; } = null!;

@@ -24,7 +24,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
         public int TotalComments { get; set; }
         public int TotalLikes { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {

@@ -1,132 +1,145 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RPGForum.Data;
 using RPGForum.Models;
+using RPGForum.Data;
 
-namespace RPGForum.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class PersonagensController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class PersonagensController : ControllerBase
+    private readonly ApplicationDbContext _context;
+
+    public PersonagensController(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public PersonagensController(ApplicationDbContext context)
+    /// <summary>
+    /// Get de todas as Personagens
+    /// </summary>
+    /// <returns></returns>
+    // GET: api/Personagens
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Personagens>>> GetPersonagens()
+    {
+        return await _context.Personagens.ToListAsync();
+    }
+
+    /// <summary>
+    /// Get de uma Personagem específica
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    // GET: api/Personagens/5
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Personagens>> GetPersonagens(int id)
+    {
+        var personagens = await _context.Personagens.FindAsync(id);
+
+        if (personagens == null)
         {
-            _context = context;
+            return NotFound(new { message = "Personagem não encontrada" });
         }
 
-        /// <summary>
-        /// Obter todas as personagens / classes
-        /// </summary>
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Personagens>>> GetPersonagens()
+        return personagens;
+    }
+
+    /// <summary>
+    /// Editar uma Personagem (requer Autorização de Administração)
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="personagens"></param>
+    /// <returns></returns>
+    // PUT: api/Personagens/5
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> PutPersonagens(int? id, Personagens personagens)
+    {
+        if (id != personagens.Id)
         {
-            return await _context.Personagens.ToListAsync();
+            return BadRequest(new { message = "Id não corresponde" });
         }
 
-        /// <summary>
-        /// Obter uma personagem / classe específica
-        /// </summary>
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Personagens>> GetPersonagem(int id)
+        if (!ModelState.IsValid)
         {
-            var personagem = await _context.Personagens.FindAsync(id);
+            return BadRequest(ModelState);
+        }
 
-            if (personagem == null)
+        _context.Entry(personagens).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!PersonagensExists(id))
             {
                 return NotFound(new { message = "Personagem não encontrada" });
             }
-
-            return personagem;
+            else
+            {
+                throw;
+            }
         }
 
-        /// <summary>
-        /// Criar uma nova personagem / classe (requer autorização de Administrador)
-        /// </summary>
-        [HttpPost]
-        [Authorize(Roles = "Administrator")]
-        public async Task<ActionResult<Personagens>> PostPersonagem(Personagens personagem)
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Criar uma nova Personagem (requer Autorização de Administração)
+    /// </summary>
+    /// <param name="personagens"></param>
+    /// <returns></returns>
+    // POST: api/Personagens
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    [HttpPost]
+    [Authorize(Roles = "Administrator")]
+    public async Task<ActionResult<Personagens>> PostPersonagens(Personagens personagens)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            _context.Personagens.Add(personagem);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetPersonagem), new { id = personagem.Id }, personagem);
+            return BadRequest(ModelState);
         }
 
-        /// <summary>
-        /// Atualizar uma personagem / classe (requer autorização de Administrador)
-        /// </summary>
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> PutPersonagem(int id, Personagens personagem)
+        _context.Personagens.Add(personagens);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetPersonagens), new { id = personagens.Id }, personagens);
+    }
+
+    /// <summary>
+    /// Eliminar uma Personagem (requer Autorização de Administração)
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    // DELETE: api/Personagens/5
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> DeletePersonagens(int? id)
+    {
+        var personagens = await _context.Personagens.FindAsync(id);
+        if (personagens == null)
         {
-            if (id != personagem.Id)
-            {
-                return BadRequest(new { message = "ID não corresponde" });
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            _context.Entry(personagem).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PersonagemExists(id))
-                {
-                    return NotFound(new { message = "Personagem não encontrada" });
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return NotFound(new { message = "Personagem não encontrada" });
         }
 
-        /// <summary>
-        /// Eliminar uma personagem / classe (requer autorização de Administrador)
-        /// </summary>
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> DeletePersonagem(int id)
+        var buildsCount = await _context.Builds.CountAsync(b => b.CharacterId == id);
+        if (buildsCount > 0)
         {
-            var personagem = await _context.Personagens.FindAsync(id);
-            if (personagem == null)
-            {
-                return NotFound(new { message = "Personagem não encontrada" });
-            }
-
-            // Verificar se existem builds associadas
-            var buildsCount = await _context.Builds.CountAsync(b => b.CharacterId == id);
-            if (buildsCount > 0)
-            {
-                return BadRequest(new { message = "Não é possível eliminar uma personagem que possui builds associadas" });
-            }
-
-            _context.Personagens.Remove(personagem);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return BadRequest(new { message = "Não é possível eliminar uma personagem que está associada a builds existentes" });
         }
 
-        private bool PersonagemExists(int id)
-        {
-            return _context.Personagens.Any(e => e.Id == id);
-        }
+        _context.Personagens.Remove(personagens);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private bool PersonagensExists(int? id)
+    {
+        return _context.Personagens.Any(e => e.Id == id);
     }
 }

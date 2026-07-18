@@ -1,132 +1,144 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using RPGForum.Data;
 using RPGForum.Models;
+using RPGForum.Data;
 
-namespace RPGForum.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class ArmasController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ArmasController : ControllerBase
+    private readonly ApplicationDbContext _context;
+    public ArmasController(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public ArmasController(ApplicationDbContext context)
+    /// <summary>
+    /// Get de todas as armas
+    /// </summary>
+    /// <returns></returns>
+    // GET: api/Armas
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Armas>>> GetArmas()
+    {
+        return await _context.Armas.ToListAsync();
+    }
+
+    /// <summary>
+    /// Get de uma arma específica pelo ID
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    // GET: api/Armas/5
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Armas>> GetArmas(int id)
+    {
+        var armas = await _context.Armas.FindAsync(id);
+
+        if (armas == null)
         {
-            _context = context;
+            return NotFound();
         }
 
-        /// <summary>
-        /// Obter todas as armas
-        /// </summary>
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Armas>>> GetArmas()
+        return armas;
+    }
+
+    /// <summary>
+    /// Editar uma arma existente (requer autorização de administrador)
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="armas"></param>
+    /// <returns></returns>
+    // PUT: api/Armas/5
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> PutArmas(int? id, Armas armas)
+    {
+        if (id != armas.Id)
         {
-            return await _context.Armas.ToListAsync();
+            return BadRequest(new { message = "ID não corresponde"});
         }
 
-        /// <summary>
-        /// Obter uma arma específica
-        /// </summary>
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Armas>> GetArma(int id)
+        if (!ModelState.IsValid)
         {
-            var arma = await _context.Armas.FindAsync(id);
+            return BadRequest(ModelState);
+        }
 
-            if (arma == null)
+        _context.Entry(armas).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ArmasExists(id))
             {
                 return NotFound(new { message = "Arma não encontrada" });
             }
-
-            return arma;
+            else
+            {
+                throw;
+            }
         }
 
-        /// <summary>
-        /// Criar uma nova arma (requer autorização de Administrador)
-        /// </summary>
-        [HttpPost]
-        [Authorize(Roles = "Administrator")]
-        public async Task<ActionResult<Armas>> PostArma(Armas arma)
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Criar uma nova arma (requer autorização de administrador)
+    /// </summary>
+    /// <param name="armas"></param>
+    /// <returns></returns>
+
+    // POST: api/Armas
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    [HttpPost]
+    public async Task<ActionResult<Armas>> PostArmas(Armas armas)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            _context.Armas.Add(arma);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetArma), new { id = arma.Id }, arma);
+            return BadRequest(ModelState);
         }
 
-        /// <summary>
-        /// Atualizar uma arma (requer autorização de Administrador)
-        /// </summary>
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> PutArma(int id, Armas arma)
+        _context.Armas.Add(armas);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetArmas), new { id = armas.Id }, armas);
+    }
+
+    /// <summary>
+    /// Eliminar uma arma existente (requer autorização de administrador)
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    // DELETE: api/Armas/5
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> DeleteArmas(int? id)
+    {
+        var armas = await _context.Armas.FindAsync(id);
+        if (armas == null)
         {
-            if (id != arma.Id)
-            {
-                return BadRequest(new { message = "ID não corresponde" });
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            _context.Entry(arma).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ArmaExists(id))
-                {
-                    return NotFound(new { message = "Arma não encontrada" });
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return NotFound(new { message = "Arma não encontrada"});
         }
 
-        /// <summary>
-        /// Eliminar uma arma (requer autorização de Administrador)
-        /// </summary>
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> DeleteArma(int id)
+        var buildWeaponsCount = await _context.BuildWeapons.CountAsync(bw => bw.WeaponId == id);
+        if (buildWeaponsCount > 0)
         {
-            var arma = await _context.Armas.FindAsync(id);
-            if (arma == null)
-            {
-                return NotFound(new { message = "Arma não encontrada" });
-            }
-
-            // Verificar se existem builds associados
-            var buildWeaponsCount = await _context.BuildWeapons.CountAsync(bw => bw.WeaponId == id);
-            if (buildWeaponsCount > 0)
-            {
-                return BadRequest(new { message = "Não é possível eliminar uma arma que tem builds associadas" });
-            }
-
-            _context.Armas.Remove(arma);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return BadRequest(new { message = "Não é possível eliminar uma arma que tem builds associadas" });
         }
 
-        private bool ArmaExists(int id)
-        {
-            return _context.Armas.Any(e => e.Id == id);
-        }
+        _context.Armas.Remove(armas);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private bool ArmasExists(int? id)
+    {
+        return _context.Armas.Any(e => e.Id == id);
     }
 }

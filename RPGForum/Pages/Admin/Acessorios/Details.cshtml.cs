@@ -13,9 +13,9 @@ namespace RPGForum.Pages.Admin.Acessorios
     public class DetailsModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<Utilizadores> _userManager;
+        private readonly UserManager<Models.Utilizadores> _userManager;
 
-        public DetailsModel(ApplicationDbContext context, UserManager<Utilizadores> userManager)
+        public DetailsModel(ApplicationDbContext context, UserManager<Models.Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -25,7 +25,7 @@ namespace RPGForum.Pages.Admin.Acessorios
         public Models.Build Build { get; set; } = null!;
         public bool IsAutor { get; set; }
         public bool JaDeuGosto { get; set; }
-        public Utilizadores? UtilizadorAtual { get; set; }
+        public Models.Utilizadores? UtilizadorAtual { get; set; }
 
         // --- Formulário de comentário ---
         [BindProperty]
@@ -107,7 +107,7 @@ namespace RPGForum.Pages.Admin.Acessorios
             // Se for resposta, validar que o comentário pai existe e pertence a esta build
             if (CommentParentId.HasValue)
             {
-                var pai = await _context.Comentario
+                var pai = await _context.Comentarios
                     .FirstOrDefaultAsync(c => c.Id == CommentParentId.Value && c.BuildId == id);
                 if (pai == null) CommentParentId = null; // Pai inválido → tratar como raiz
             }
@@ -121,7 +121,7 @@ namespace RPGForum.Pages.Admin.Acessorios
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Comentario.Add(comentario);
+            _context.Comentarios.Add(comentario);
             await _context.SaveChangesAsync();
 
             // Redirecionar de volta à página com âncora para os comentários
@@ -135,7 +135,7 @@ namespace RPGForum.Pages.Admin.Acessorios
             var utilizador = await ObterUtilizadorAtualAsync();
             if (utilizador == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            var comentario = await _context.Comentario
+            var comentario = await _context.Comentarios
                 .FirstOrDefaultAsync(c => c.Id == comentarioId && c.BuildId == id);
 
             if (comentario == null) return NotFound();
@@ -144,7 +144,7 @@ namespace RPGForum.Pages.Admin.Acessorios
             if (comentario.UserId != utilizador.Id && !User.IsInRole("Administrator"))
                 return Forbid();
 
-            _context.Comentario.Remove(comentario);
+            _context.Comentarios.Remove(comentario);
             await _context.SaveChangesAsync();
 
             return RedirectToPage(pageName: null, pageHandler: null, new { id }, fragment: "comentarios");
@@ -182,7 +182,7 @@ namespace RPGForum.Pages.Admin.Acessorios
             JaDeuGosto = Build.Likes.Any(l => l.UserId == UtilizadorAtual.Id);
         }
 
-        private async Task<Utilizadores?> ObterUtilizadorAtualAsync()
+        private async Task<Models.Utilizadores?> ObterUtilizadorAtualAsync()
         {
             var utilizador = await _userManager.GetUserAsync(User);
             if (utilizador == null) return null;

@@ -7,17 +7,32 @@ namespace RPGForum.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey(nameof(Models.Build))]
+        /// <summary>
+        /// ID do build
+        /// </summary>
+        [ForeignKey(nameof(Build))]
         public int BuildId { get; set; }
 
+        /// <summary>
+        /// ID do utilizador
+        /// </summary>
         [ForeignKey(nameof(Utilizadores))]
-        public int UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// ID do comentário pai (para respostas)
+        /// </summary>
         public int? ParentId { get; set; }
 
+        /// <summary>
+        /// Conteúdo do comentário
+        /// </summary>
         [Required, MaxLength(2000)]
         public string Content { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Data de criação do comentário
+        /// </summary>
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public Build Build { get; set; } = null!;

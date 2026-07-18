@@ -8,18 +8,34 @@ namespace RPGForum.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey(nameof(Utilizadores))]
-        public int UtilizadorID { get; set; }
+        /// <summary>
+        /// ID do utilizador que criou o build
+        /// </summary>
+        [ForeignKey(nameof(Utilizadores))] 
+        public string UtilizadorID { get; set; } = string.Empty;
 
+        /// <summary>
+        /// ID da personagem que vai ser usada no build
+        /// </summary>
         [ForeignKey(nameof(Personagens))]
         public int CharacterId { get; set; }
 
-        [Required, MaxLength(50)]
+        /// <summary>
+        /// Nome da build
+        /// </summary>
+        [Required(ErrorMessage = "O título é obrigatório.")] 
+        [MaxLength(50, ErrorMessage = "O título não pode ter mais de 50 caracteres.")]
         public string Title { get; set; } = string.Empty;
 
-        [MaxLength(2500)]
+        /// <summary>
+        /// Descrição do build
+        /// </summary>
+        [MaxLength(2500, ErrorMessage = "A descrição não pode exceder os 2500 caracteres.")]
         public string? Description { get; set; }
 
+        /// <summary>
+        /// Nível da personagem
+        /// </summary>
         [Range(1, 100)]
         public int Level { get; set; } = 1;
 

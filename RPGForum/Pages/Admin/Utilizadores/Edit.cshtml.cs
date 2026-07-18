@@ -28,7 +28,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
 
         public class InputModel
         {
-            public int Id { get; set; }
+            public string Id { get; set; }
 
             [Required(ErrorMessage = "O nome de utilizador é obrigatório.")]
             [StringLength(30, ErrorMessage = "O nome de utilizador não pode exceder 30 caracteres.")]
@@ -44,7 +44,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
             public string Role { get; set; } = "Registered";
         }
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
@@ -60,7 +60,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
             Input = new InputModel
             {
                 Id = utilizador.Id,
-                Username = utilizador.Username,
+                Username = utilizador.UserName,
                 Email = utilizador.Email,
                 Role = utilizador.Role
             };
@@ -90,7 +90,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
             }
 
             // Validar username duplicado
-            var usernameExists = await _context.Utilizadores.AnyAsync(u => u.Username == Input.Username && u.Id != Input.Id);
+            var usernameExists = await _context.Utilizadores.AnyAsync(u => u.UserName == Input.Username && u.Id != Input.Id);
             if (usernameExists)
             {
                 ModelState.AddModelError("Input.Username", "Este nome de utilizador já está em uso.");
@@ -134,10 +134,9 @@ namespace RPGForum.Pages.Admin.Utilizadores
             }
 
             // Atualizar na tabela Utilizadores
-            utilizador.Username = Input.Username;
+            utilizador.UserName = Input.Username;
             utilizador.Email = Input.Email;
             utilizador.Role = Input.Role;
-            utilizador.IdentityUserName = Input.Email;
 
             _context.Attach(utilizador).State = EntityState.Modified;
             await _context.SaveChangesAsync();

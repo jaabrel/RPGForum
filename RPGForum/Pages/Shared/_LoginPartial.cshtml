@@ -11,10 +11,10 @@
     if (SignInManager.IsSignedIn(User))
     {
         var identityName = User.Identity?.Name;
-        var utilizador = await DbContext.Utilizadores.FirstOrDefaultAsync(u => u.IdentityUserName == identityName);
+        var utilizador = await DbContext.Utilizadores.FirstOrDefaultAsync(u => u.UserName == identityName);
         if (utilizador != null)
         {
-            displayUsername = utilizador.Username;
+            displayUsername = utilizador.UserName;
             if (!string.IsNullOrEmpty(displayUsername))
             {
                 firstLetter = displayUsername.Substring(0, 1).ToUpper();
