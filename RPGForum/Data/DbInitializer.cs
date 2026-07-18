@@ -3,6 +3,7 @@ using RPGForum.Models;
 
 namespace RPGForum.Data
 {
+    
     public static class DbInitializer
     {
         public static async Task SeedAsync(ApplicationDbContext context)
@@ -99,4 +100,5 @@ namespace RPGForum.Data
             await context.SaveChangesAsync();
         }
     }
+    
 }

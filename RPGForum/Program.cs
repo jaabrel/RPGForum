@@ -1,25 +1,24 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using RPGForum.Data;
+using RPGForum.Hubs;
+using RPGForum.Models;
+using RPGForum.Services;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using RPGForum.Data;
-using RPGForum.Models;
-using RPGForum.Hubs;
-using Microsoft.OpenApi;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Authorization;
-using RPGForum.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("AzureConnection");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<Utilizadores>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -34,12 +33,23 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "RPGForum API",
         Version = "v1",
-        Description =
-            "Api para gestão dos Personagens, das Armas, das Builds e dos Acessórios com autenticação e permissões"
+        Description = "Api para gestão dos Personagens, das Armas, das Builds e dos Acessórios com autenticação e permissões"
     });
-    //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    //c.IncludeXmlComments(xmlPath);
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Insere o token JWT desta forma: Bearer {o_teu_token}",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    // Nova sintaxe (Swashbuckle v10 / Microsoft.OpenApi v2)
+    c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
+    });
 });
 
 builder.Services.AddControllers()
@@ -143,11 +153,11 @@ app.MapRazorPages()
 app.MapControllers();
 
 app.MapHub<CommentsHub>("/commentsHub");
-
+/*
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<RPGForum.Data.ApplicationDbContext>();
     await RPGForum.Data.DbInitializer.SeedAsync(context);
 }
-
+*/
 app.Run();
