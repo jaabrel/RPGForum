@@ -80,6 +80,16 @@ public class BuildsController : ControllerBase
         return NoContent();
     }
 
+    public class BuildCreateDto
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public int Level { get; set; }
+        public int CharacterId { get; set; }
+        public List<int> WeaponsIds { get; set; } = new List<int>();
+        public List<int> AccessoryIds { get; set; } = new List<int>();
+    }
+
     /// <summary>
     /// Criar uma Build.
     /// </summary>
@@ -89,17 +99,39 @@ public class BuildsController : ControllerBase
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<Build>> PostBuild(Build build)
+    public async Task<ActionResult<Build>> PostBuild(BuildCreateDto dto)
     {
         var utilizador = await _userManager.GetUserAsync(User);
         if (utilizador == null) return Unauthorized();
 
-        build.UtilizadorID = utilizador.Id;
-        build.CreatedAt = DateTime.UtcNow;
+        var build = new Build
+        {
+            Title = dto.Title,
+            Description = dto.Description,
+            Level = dto.Level,
+            CharacterId = dto.CharacterId,
+            UtilizadorID = utilizador.Id,
+            CreatedAt = DateTime.UtcNow
+        };
 
         _context.Builds.Add(build);
         await _context.SaveChangesAsync();
 
+        foreach (var wId in dto.WeaponsIds)
+        {
+            _context.BuildWeapons.Add(new BuildWeapon
+            {
+                BuildId = build.Id,
+                WeaponId = wId
+            });
+        }
+
+        foreach (var aId in dto.AccessoryIds)
+        {
+            _context.BuildAccessories.Add(new BuildAccessory { BuildId = build.Id, AccessoryId = aId });
+        }
+
+        await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetBuild), new { id = build.Id }, build);
     }
 

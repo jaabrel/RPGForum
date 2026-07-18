@@ -45,10 +45,17 @@ public class DeleteModel : PageModel
             return NotFound();
         }
 
-        var personagens = await _context.Personagens.FindAsync(id);
-        if (personagens != null)
+        var personagem = await _context.Personagens.FindAsync(id);
+        if (personagem != null)
         {
-            Personagens = personagens;
+            bool hasBuilds = _context.Builds.Any(b => b.CharacterId == id);
+            if (hasBuilds)
+            {
+                ModelState.AddModelError(string.Empty, "Não é possível apagar a classe porque existem builds associadas.");
+                Personagens = personagem;
+                return Page();
+            }
+
             _context.Personagens.Remove(Personagens);
             await _context.SaveChangesAsync();
         }

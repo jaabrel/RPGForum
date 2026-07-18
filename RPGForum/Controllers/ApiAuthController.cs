@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RPGForum.Models;
-using RPGForum.Services.Jwt;
+using RPGForum.Services;
 
 namespace RPGForum.Controllers;
 
