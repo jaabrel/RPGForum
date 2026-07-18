@@ -1,0 +1,56 @@
+@page "{id:int}"
+@model RPGForum.Pages.Admin.Personagens.DetailsModel
+@{
+    ViewData["Title"] = "Detalhes da Personagem";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="glass-card p-5">
+            <div class="mb-4 text-center">
+                @if (!string.IsNullOrEmpty(Model.Personagem.ImageUrl))
+                {
+                    <img src="@Model.Personagem.ImageUrl" alt="@Model.Personagem.Name" class="img-thumbnail rounded-circle mb-3 shadow" style="height: 120px; width: 120px; object-fit: cover;" />
+                }
+                <h2 class="title fw-black">@Model.Personagem.Name</h2>
+                <p class="text-muted">Detalhes da Personagem Registada</p>
+            </div>
+
+            <!-- Details List -->
+            <div class="mb-4">
+                <h5 class="fw-bold border-bottom pb-2 mb-3">Informações</h5>
+                <dl class="row">
+                    <dt class="col-sm-4 text-muted">ID</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.Personagem.Id</dd>
+
+                    <dt class="col-sm-4 text-muted">Nome</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.Personagem.Name</dd>
+
+                    <dt class="col-sm-4 text-muted">URL da Imagem</dt>
+                    <dd class="col-sm-8 text-truncate small"><a href="@Model.Personagem.ImageUrl" target="_blank">@Model.Personagem.ImageUrl</a></dd>
+                </dl>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="fw-bold border-bottom pb-2 mb-3">Descrição da Personagem</h5>
+                <div class="p-3 bg-light rounded border text-muted" style="white-space: pre-line">
+                    @if (string.IsNullOrEmpty(Model.Personagem.Description))
+                    {
+                        <span>Sem descrição associada a esta personagem.</span>
+                    }
+                    else
+                    {
+                        @Model.Personagem.Description
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 pt-3 border-top">
+                <a asp-page="./Edit" asp-route-id="@Model.Personagem.Id" class="btn btn-primary flex-grow-1">Editar Personagem</a>
+                <a asp-page="./Delete" asp-route-id="@Model.Personagem.Id" class="btn btn-outline-danger">Eliminar</a>
+                <a asp-page="./Index" class="btn btn-outline-secondary">Voltar</a>
+            </div>
+        </div>
+    </div>
+</div>

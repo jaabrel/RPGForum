@@ -33,14 +33,22 @@ namespace RPGForum.Services
                 emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = htmlMessage };
 
                 using var client = new SmtpClient();
-                await client.ConnectAsync(host, int.Parse(_config["Smtp:Port"] ?? "25"), false);
+                var port = int.Parse(_config["Smtp:Port"] ?? "587");
+                
+                // Suporta STARTTLS (Porta 587) e SSL/TLS (Porta 465) automaticamente
+                await client.ConnectAsync(host, port, MailKit.Security.SecureSocketOptions.Auto);
+                
                 await client.AuthenticateAsync(_config["Smtp:From"], _config["Smtp:Password"]);
                 await client.SendAsync(emailMessage);
                 await client.DisconnectAsync(true);
             }
-            catch
+            catch (System.Exception ex)
             {
-                // Logar silenciosamente ou apenas impedir o crash no fluxo de registo
+                System.Console.WriteLine($"[SMTP ERROR] Erro ao enviar email para {email}: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Console.WriteLine($"[SMTP ERROR] Detalhes internos: {ex.InnerException.Message}");
+                }
             }
         }
     }

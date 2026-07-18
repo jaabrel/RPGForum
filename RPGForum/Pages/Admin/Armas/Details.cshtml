@@ -1,0 +1,62 @@
+@page "{id:int}"
+@model RPGForum.Pages.Admin.Armas.DetailsModel
+@{
+    ViewData["Title"] = "Detalhes da Arma";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="glass-card p-5">
+            <div class="mb-4 text-center">
+                @if (!string.IsNullOrEmpty(Model.Arma.ImageUrl))
+                {
+                    <img src="@Model.Arma.ImageUrl" alt="@Model.Arma.Name" class="img-thumbnail rounded-circle mb-3 shadow" style="height: 120px; width: 120px; object-fit: cover;" />
+                }
+                <h2 class="title fw-black">@Model.Arma.Name</h2>
+                <span class="badge bg-secondary mb-2 fs-6">@Model.Arma.Type</span>
+                <p class="text-muted">Detalhes da Arma Registada</p>
+            </div>
+
+            <!-- Details List -->
+            <div class="mb-4">
+                <h5 class="fw-bold border-bottom pb-2 mb-3">Informações</h5>
+                <dl class="row">
+                    <dt class="col-sm-4 text-muted">ID</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.Arma.Id</dd>
+
+                    <dt class="col-sm-4 text-muted">Nome</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.Arma.Name</dd>
+
+                    <dt class="col-sm-4 text-muted">Tipo de Arma</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-secondary">@Model.Arma.Type</span>
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">URL da Imagem</dt>
+                    <dd class="col-sm-8 text-truncate small"><a href="@Model.Arma.ImageUrl" target="_blank">@Model.Arma.ImageUrl</a></dd>
+                </dl>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="fw-bold border-bottom pb-2 mb-3">Descrição da Arma</h5>
+                <div class="p-3 bg-light rounded border text-muted" style="white-space: pre-line">
+                    @if (string.IsNullOrEmpty(Model.Arma.Description))
+                    {
+                        <span>Sem descrição associada a esta arma.</span>
+                    }
+                    else
+                    {
+                        @Model.Arma.Description
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 pt-3 border-top">
+                <a asp-page="./Edit" asp-route-id="@Model.Arma.Id" class="btn btn-primary flex-grow-1">Editar Arma</a>
+                <a asp-page="./Delete" asp-route-id="@Model.Arma.Id" class="btn btn-outline-danger">Eliminar</a>
+                <a asp-page="./Index" class="btn btn-outline-secondary">Voltar</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+@page "{id:int}"
+@model RPGForum.Pages.Admin.Utilizadores.EditModel
+@{
+    ViewData["Title"] = "Editar Utilizador";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="glass-card p-5">
+            <div class="mb-4 text-center">
+                <h2 class="title fw-black">👥 Editar Utilizador</h2>
+                <p class="text-muted">Alterar informações de conta do utilizador.</p>
+            </div>
+
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+                <input type="hidden" asp-for="Input.Id" />
+
+                <!-- Username -->
+                <div class="mb-3">
+                    <label asp-for="Input.Username" class="form-label fw-semibold">Nome de Utilizador</label>
+                    <input asp-for="Input.Username" class="form-control form-control-custom" placeholder="Escreve o nome de utilizador..." />
+                    <span asp-validation-for="Input.Username" class="text-danger small"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label fw-semibold">Endereço de Email</label>
+                    <input asp-for="Input.Email" class="form-control form-control-custom" placeholder="nome@exemplo.com" />
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+
+                <!-- Role -->
+                <div class="mb-4">
+                    <label asp-for="Input.Role" class="form-label fw-semibold">Função (Role)</label>
+                    <select asp-for="Input.Role" class="form-select form-control-custom">
+                        <option value="Registered">Registado</option>
+                        <option value="Manager">Moderador</option>
+                        <option value="Administrator">Administrador</option>
+                    </select>
+                    <span asp-validation-for="Input.Role" class="text-danger small"></span>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">💾 Guardar Alterações</button>
+                    <a asp-page="./Index" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
