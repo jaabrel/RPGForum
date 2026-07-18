@@ -11,7 +11,7 @@
     if (SignInManager.IsSignedIn(User))
     {
         var identityName = User.Identity?.Name;
-        var utilizador = await DbContext.Utilizadores.FirstOrDefaultAsync(u => u.UserName == identityName || u.Email == identityName);
+        var utilizador = await DbContext.Utilizadores.FirstOrDefaultAsync(u => u.UserName == identityName);
         if (utilizador != null)
         {
             displayUsername = utilizador.UserName;

@@ -55,7 +55,7 @@ namespace RPGForum.Pages.Admin.Utilizadores
             if (utilizador != null)
             {
                 // Impedir que o administrador se elimine a si próprio
-                if (utilizador.Id == _userManager.GetUserId(User))
+                if (utilizador.Email == User.Identity?.Name)
                 {
                     ModelState.AddModelError(string.Empty, "Não podes apagar a tua própria conta de administrador!");
                     Utilizador = utilizador;

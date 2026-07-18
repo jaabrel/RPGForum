@@ -30,8 +30,8 @@ namespace RPGForum.Data
                 new Utilizadores
                 {
                     Id = "admin",
-                    UserName = "admin",
-                    NormalizedUserName = "ADMIN",
+                    UserName = "admin@mail.pt",
+                    NormalizedUserName = "ADMIN@MAIL.PT",
                     Email = "admin@mail.pt",
                     NormalizedEmail = "ADMIN@MAIL.PT",
                     EmailConfirmed = true,

@@ -24,10 +24,6 @@ namespace RPGForum.Data
                     // 3. Set journal mode to DELETE permanently
                     cmd.CommandText = "PRAGMA journal_mode=DELETE;";
                     await cmd.ExecuteNonQueryAsync();
-
-                    // 4. Update seeded admin's UserName to 'admin' if it is still the email
-                    cmd.CommandText = "UPDATE AspNetUsers SET UserName = 'admin', NormalizedUserName = 'ADMIN' WHERE Id = 'admin' AND UserName = 'admin@mail.pt';";
-                    await cmd.ExecuteNonQueryAsync();
                 }
             }
             catch (Exception ex)
