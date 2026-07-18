@@ -20,6 +20,10 @@ namespace RPGForum.Data
                     // 2. Rename stats migration from 20260718174412_AddEquipStats to 20260718190342_AddEquipStats
                     cmd.CommandText = "UPDATE __EFMigrationsHistory SET MigrationId = '20260718190342_AddEquipStats' WHERE MigrationId = '20260718174412_AddEquipStats';";
                     await cmd.ExecuteNonQueryAsync();
+
+                    // 3. Set journal mode to DELETE permanently
+                    cmd.CommandText = "PRAGMA journal_mode=DELETE;";
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
             catch (Exception ex)
