@@ -1,61 +1,604 @@
-@page
+@page "{id:int}"
 @model RPGForum.Pages.Build.DetailsModel
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Build.Title;
+    var build = Model.Build;
+    var utilizadorAtual = Model.UtilizadorAtual;
 }
 
-<h1>Details</h1>
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="/FeedForum">Fórum</a></li>
+        <li class="breadcrumb-item active">@build.Title</li>
+    </ol>
+</nav>
 
-<div>
-    <h4>Build</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.UtilizadorID)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.UtilizadorID)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.CharacterId)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.CharacterId)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.Title)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.Title)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.Description)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.Level)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.Level)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.CreatedAt)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.CreatedAt)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.UpdatedAt)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.UpdatedAt)
-        </dd>
-    </dl>
+<!-- Cabeçalho -->
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h2 mb-1">@build.Title</h1>
+        <div class="d-flex flex-wrap gap-2 align-items-center text-muted small">
+            <span>por <strong>@build.User?.UserName</strong></span>
+            <span>·</span>
+            <span class="badge bg-secondary">@build.CharClass?.Name</span>
+            <span class="badge bg-primary">Nível @build.Level</span>
+            <span>·</span>
+            <span>@build.CreatedAt.ToString("dd/MM/yyyy")</span>
+            @if (build.UpdatedAt != build.CreatedAt)
+            {
+                <span class="text-muted">(editado @build.UpdatedAt.ToString("dd/MM/yyyy"))</span>
+            }
+        </div>
+    </div>
+    @if (Model.IsAutor || User.IsInRole("Administrator"))
+    {
+        <div class="d-flex gap-2">
+            <a asp-page="Edit" asp-route-id="@build.Id" class="btn btn-outline-primary btn-sm">Editar</a>
+            <a asp-page="Delete" asp-route-id="@build.Id" class="btn btn-outline-danger btn-sm">Apagar</a>
+        </div>
+    }
 </div>
-<div>
-    <a asp-page="./Edit" asp-route-id="@Model.Build.Id">Edit</a> |
-    <a asp-page="./Index">Back to List</a>
+
+<div class="row g-4">
+
+    <!-- ===== COLUNA PRINCIPAL ===== -->
+    <div class="col-lg-8">
+
+        <!-- Descrição -->
+        @if (!string.IsNullOrEmpty(build.Description))
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <p class="mb-0" style="white-space: pre-line">@build.Description</p>
+                </div>
+            </div>
+        }
+
+        <!-- Armas -->
+        @if (build.BuidWeapons.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header fw-semibold">⚔️ Armas</div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var bw in build.BuidWeapons)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                             <span>@bw.Weapon?.Name</span>
+                            @if (!string.IsNullOrEmpty(bw.Weapon?.Type))
+                            {
+                                <span class="badge bg-light text-dark border">@bw.Weapon.Type</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <!-- Acessórios -->
+        @if (build.BuildAccessories.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header fw-semibold">💎 Acessórios</div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var ba in build.BuildAccessories.OrderBy(ba => ba.SlotPosition))
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                             <span>@ba.Accessory?.Name</span>
+                            @if (!string.IsNullOrEmpty(ba.Accessory?.Type))
+                            {
+                                <span class="badge bg-light text-dark border">@ba.Accessory.Type</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <!-- ===== GOSTOS ===== -->
+        <div class="card mb-4" id="gostos">
+            <div class="card-body d-flex align-items-center gap-3 flex-wrap">
+                <span class="fs-5">
+                    ♥ <strong id="gostos-contador">@build.Likes.Count</strong>
+                    <span id="gostos-texto">@(build.Likes.Count == 1 ? "gosto" : "gostos")</span>
+                </span>
+
+                @if (User.Identity!.IsAuthenticated && utilizadorAtual != null)
+                {
+                    <form method="post" asp-page-handler="Gosto" asp-route-id="@build.Id" id="form-gosto">
+                        @if (Model.JaDeuGosto)
+                        {
+                            <button type="submit" class="btn btn-danger btn-sm" id="btn-gosto">
+                                ♥ Remover gosto
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-outline-danger btn-sm" id="btn-gosto">
+                                ♡ Dar gosto
+                            </button>
+                        }
+                    </form>
+                }
+                else if (!User.Identity!.IsAuthenticated)
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login"
+                       class="btn btn-outline-secondary btn-sm">
+                        Inicia sessão para gostar
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- ===== COMENTÁRIOS ===== -->
+        <div class="card" id="comentarios">
+            <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+                <span>💬 Comentários (<span id="comentarios-contador">@build.Comments.Count</span>)</span>
+            </div>
+            <div class="card-body">
+
+                @* Mensagens de validação do formulário *@
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                @* Formulário de novo comentário (raiz) *@
+                @if (User.Identity!.IsAuthenticated && utilizadorAtual != null)
+                {
+                    <form method="post" asp-page-handler="Comentar" asp-route-id="@build.Id"
+                          class="mb-4 pb-4 border-bottom" id="form-comentario-raiz">
+                        <input type="hidden" name="CommentParentId" value="" />
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold small">Novo comentário</label>
+                            <textarea name="Conteudo" id="input-comentario-raiz" class="form-control" rows="3"
+                                      placeholder="Escreve o teu comentário..."
+                                      maxlength="2000" required>@Model.Conteudo</textarea>
+                            <span asp-validation-for="Conteudo" class="text-danger small"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">Publicar</button>
+                    </form>
+                }
+                else if (!User.Identity!.IsAuthenticated)
+                {
+                    <p class="text-muted small mb-4">
+                        <a asp-area="Identity" asp-page="/Account/Login">Inicia sessão</a>
+                        para comentar.
+                    </p>
+                }
+
+                @* Lista de comentários *@
+                @{
+                    var comentariosRaiz = build.Comments
+                        .Where(c => c.ParentId == null)
+                        .OrderByDescending(c => c.CreatedAt)
+                        .ToList();
+                }
+
+                <div id="lista-comentarios">
+                    @if (!comentariosRaiz.Any())
+                    {
+                        <p class="text-muted small mb-0" id="sem-comentarios-aviso">
+                            Ainda não há comentários. Sê o primeiro!
+                        </p>
+                    }
+
+                    @foreach (var comentario in comentariosRaiz)
+                    {
+                        <div class="mb-3" id="comentario-@comentario.Id">
+                            <div class="border rounded p-3">
+
+                                <!-- Cabeçalho do comentário -->
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <strong class="small">@comentario.User?.UserName</strong>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <small class="text-muted">
+                                            @comentario.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                        @if (utilizadorAtual != null &&
+                                            (comentario.UserId == utilizadorAtual.Id || User.IsInRole("Administrator")))
+                                        {
+                                            <form method="post"
+                                                  asp-page-handler="ApagarComentario"
+                                                  asp-route-id="@build.Id"
+                                                  asp-route-comentarioId="@comentario.Id"
+                                                  onsubmit="return confirm('Apagar este comentário?')">
+                                                <button type="submit"
+                                                        class="btn btn-link btn-sm text-danger p-0"
+                                                        title="Apagar comentário">
+                                                    ✕
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Conteúdo -->
+                                <p class="mb-3 small" style="white-space: pre-line">@comentario.Content</p>
+
+                                <!-- Respostas existentes -->
+                                <div class="ms-3 ps-3 border-start mb-3" id="respostas-container-@comentario.Id">
+                                    @if (comentario.Replies.Any())
+                                    {
+                                        @foreach (var resposta in comentario.Replies.OrderBy(r => r.CreatedAt))
+                                        {
+                                            <div class="mb-2" id="comentario-@resposta.Id">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <strong class="small">@resposta.User?.UserName</strong>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <small class="text-muted">
+                                                            @resposta.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                                        </small>
+                                                        @if (utilizadorAtual != null &&
+                                                            (resposta.UserId == utilizadorAtual.Id || User.IsInRole("Administrator")))
+                                                        {
+                                                            <form method="post"
+                                                                  asp-page-handler="ApagarComentario"
+                                                                  asp-route-id="@build.Id"
+                                                                  asp-route-comentarioId="@resposta.Id"
+                                                                  onsubmit="return confirm('Apagar esta resposta?')">
+                                                                <button type="submit"
+                                                                        class="btn btn-link btn-sm text-danger p-0"
+                                                                        title="Apagar resposta">
+                                                                    ✕
+                                                                </button>
+                                                            </form>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <p class="mb-0 small" style="white-space: pre-line">@resposta.Content</p>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+
+                                <!-- Formulário de resposta (colapsável) -->
+                                @if (User.Identity!.IsAuthenticated && utilizadorAtual != null)
+                                {
+                                    <div>
+                                        <button class="btn btn-link btn-sm text-muted p-0 toggle-resposta"
+                                                data-target="resposta-@comentario.Id"
+                                                type="button">
+                                            ↩ Responder
+                                        </button>
+                                        <div id="resposta-@comentario.Id" class="mt-2" style="display:none">
+                                            <form method="post" asp-page-handler="Comentar"
+                                                  asp-route-id="@build.Id" class="form-comentario-resposta" data-parent-id="@comentario.Id">
+                                                <input type="hidden" name="CommentParentId"
+                                                       value="@comentario.Id" />
+                                                <div class="mb-2">
+                                                    <textarea name="Conteudo" class="form-control form-control-sm"
+                                                               rows="2"
+                                                               placeholder="A tua resposta..."
+                                                               maxlength="2000" required></textarea>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <button type="submit"
+                                                            class="btn btn-primary btn-sm">
+                                                        Responder
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn btn-outline-secondary btn-sm toggle-resposta"
+                                                            data-target="resposta-@comentario.Id">
+                                                        Cancelar
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== COLUNA LATERAL: PERSONAGEM, EQUIPAMENTO E ESTATÍSTICAS ===== -->
+    <div class="col-lg-4">
+        <div class="d-flex flex-column gap-4 sticky-top" style="top: 1rem;">
+            
+            @if (build.CharClass != null)
+            {
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white fw-semibold">👤 Personagem</div>
+                    <div class="card-body text-center">
+                        @if (!string.IsNullOrEmpty(build.CharClass.ImageUrl))
+                        {
+                            <img src="@build.CharClass.ImageUrl" alt="@build.CharClass.Name" 
+                                 class="img-fluid rounded mb-3" style="max-height: 180px; object-fit: contain;" />
+                        }
+                        <h5 class="fw-bold mb-1">@build.CharClass.Name</h5>
+                        <p class="text-muted small mb-0">@build.CharClass.Description</p>
+                    </div>
+                </div>
+            }
+
+            @if (build.Stats != null)
+            {
+                // Função local para fazer parse dos atributos de string delimitada por vírgula
+                Dictionary<string, int> ParseItemStats(string? affected, string? bonus)
+                {
+                    var dict = new Dictionary<string, int>();
+                    if (string.IsNullOrEmpty(affected) || string.IsNullOrEmpty(bonus)) return dict;
+                    var stats = affected.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    var values = bonus.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < Math.Min(stats.Length, values.Length); i++)
+                    {
+                        if (int.TryParse(values[i].Trim(), out int val))
+                        {
+                            var statName = stats[i].Trim().ToLower();
+                            dict[statName] = val;
+                        }
+                    }
+                    return dict;
+                }
+
+                int bonusHp = 0, bonusStrength = 0, bonusDefense = 0, bonusMagic = 0, bonusEndurance = 0, bonusSpeed = 0;
+
+                foreach (var bw in build.BuidWeapons)
+                {
+                    var dict = ParseItemStats(bw.Weapon?.StatAfetada, bw.Weapon?.StatBonus);
+                    foreach (var kvp in dict)
+                    {
+                        if (kvp.Key == "hp") bonusHp += kvp.Value;
+                        else if (kvp.Key == "força" || kvp.Key == "forca") bonusStrength += kvp.Value;
+                        else if (kvp.Key == "defesa") bonusDefense += kvp.Value;
+                        else if (kvp.Key == "magia") bonusMagic += kvp.Value;
+                        else if (kvp.Key == "resistência" || kvp.Key == "resistencia") bonusEndurance += kvp.Value;
+                        else if (kvp.Key == "velocidade") bonusSpeed += kvp.Value;
+                    }
+                }
+
+                foreach (var ba in build.BuildAccessories)
+                {
+                    var dict = ParseItemStats(ba.Accessory?.StatAfetada, ba.Accessory?.StatBonus);
+                    foreach (var kvp in dict)
+                    {
+                        if (kvp.Key == "hp") bonusHp += kvp.Value;
+                        else if (kvp.Key == "força" || kvp.Key == "forca") bonusStrength += kvp.Value;
+                        else if (kvp.Key == "defesa") bonusDefense += kvp.Value;
+                        else if (kvp.Key == "magia") bonusMagic += kvp.Value;
+                        else if (kvp.Key == "resistência" || kvp.Key == "resistencia") bonusEndurance += kvp.Value;
+                        else if (kvp.Key == "velocidade") bonusSpeed += kvp.Value;
+                    }
+                }
+
+                <!-- Card de Equipamentos Equipados -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white fw-semibold">🎒 Equipamento Equipado</div>
+                    <div class="card-body">
+                        <h6 class="fw-bold border-bottom pb-1">⚔️ Armas</h6>
+                        @if (!build.BuidWeapons.Any())
+                        {
+                            <p class="text-muted small mb-3">Nenhuma arma equipada.</p>
+                        }
+                        else
+                        {
+                            <ul class="list-unstyled mb-3 small">
+                                @foreach (var bw in build.BuidWeapons)
+                                {
+                                    <li class="mb-2">
+                                        <strong>@bw.Weapon?.Name</strong> <span class="badge bg-light text-dark border">@bw.Weapon?.Type</span>
+                                        @if (!string.IsNullOrEmpty(bw.Weapon?.StatAfetada) && !string.IsNullOrEmpty(bw.Weapon?.StatBonus))
+                                        {
+                                            var statsList = bw.Weapon.StatAfetada.Split(',');
+                                            var bonusList = bw.Weapon.StatBonus.Split(',');
+                                            <div class="small ps-2">
+                                                @for (int i = 0; i < Math.Min(statsList.Length, bonusList.Length); i++)
+                                                {
+                                                    var bonusValStr = bonusList[i];
+                                                    var isNegative = bonusValStr.StartsWith("-");
+                                                    var formattedBonus = isNegative ? bonusValStr : "+" + bonusValStr;
+                                                    <span class="@(isNegative ? "text-danger" : "text-success")">@formattedBonus @statsList[i]</span>@(i < Math.Min(statsList.Length, bonusList.Length) - 1 ? ", " : "")
+                                                }
+                                            </div>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        }
+
+                        <h6 class="fw-bold border-bottom pb-1 mt-3">💎 Acessórios</h6>
+                        @if (!build.BuildAccessories.Any())
+                        {
+                            <p class="text-muted small">Nenhum acessório equipado.</p>
+                        }
+                        else
+                        {
+                            <ul class="list-unstyled mb-0 small">
+                                @foreach (var ba in build.BuildAccessories.OrderBy(ba => ba.SlotPosition))
+                                {
+                                    <li class="mb-2">
+                                        <strong>Slot @ba.SlotPosition: @ba.Accessory?.Name</strong> <span class="badge bg-light text-dark border">@ba.Accessory?.Type</span>
+                                        @if (!string.IsNullOrEmpty(ba.Accessory?.StatAfetada) && !string.IsNullOrEmpty(ba.Accessory?.StatBonus))
+                                        {
+                                            var statsList = ba.Accessory.StatAfetada.Split(',');
+                                            var bonusList = ba.Accessory.StatBonus.Split(',');
+                                            <div class="small ps-2">
+                                                @for (int i = 0; i < Math.Min(statsList.Length, bonusList.Length); i++)
+                                                {
+                                                    var bonusValStr = bonusList[i];
+                                                    var isNegative = bonusValStr.StartsWith("-");
+                                                    var formattedBonus = isNegative ? bonusValStr : "+" + bonusValStr;
+                                                    <span class="@(isNegative ? "text-danger" : "text-success")">@formattedBonus @statsList[i]</span>@(i < Math.Min(statsList.Length, bonusList.Length) - 1 ? ", " : "")
+                                                }
+                                            </div>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+
+                <!-- Card de Estatísticas Calculadas -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header fw-semibold">📊 Estatísticas (Total)</div>
+                    <div class="card-body">
+                        @{
+                            int lvlBonus = build.Level * 2;
+                            var stats = new (string Nome, int ValorBase, int ValorTotal, string Cor)[]
+                            {
+                                ("HP",          build.Stats.Hp + lvlBonus,         build.Stats.Hp + lvlBonus + bonusHp,         "danger"),
+                                ("Força",       build.Stats.Strength + lvlBonus,   build.Stats.Strength + lvlBonus + bonusStrength,   "warning"),
+                                ("Defesa",      build.Stats.Defense + lvlBonus,    build.Stats.Defense + lvlBonus + bonusDefense,    "info"),
+                                ("Magia",       build.Stats.Magic + lvlBonus,      build.Stats.Magic + lvlBonus + bonusMagic,      "primary"),
+                                ("Resistência", build.Stats.Endurance + lvlBonus,  build.Stats.Endurance + lvlBonus + bonusEndurance,  "secondary"),
+                                ("Velocidade",  build.Stats.Speed + lvlBonus,      build.Stats.Speed + lvlBonus + bonusSpeed,      "success"),
+                            };
+                            // Escala máxima de pelo menos 100 para evitar que valores baixos preencham totalmente a barra
+                            int maxStat = Math.Max(100, stats.Max(s => s.ValorTotal));
+                        }
+                        @foreach (var s in stats)
+                        {
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span>@s.Nome</span>
+                                    <strong>
+                                        @s.ValorTotal
+                                        @if (s.ValorTotal > s.ValorBase)
+                                        {
+                                            <span class="text-success small fw-normal">(+@(s.ValorTotal - s.ValorBase))</span>
+                                        }
+                                        else if (s.ValorTotal < s.ValorBase)
+                                        {
+                                            <span class="text-danger small fw-normal">(@(s.ValorTotal - s.ValorBase))</span>
+                                        }
+                                    </strong>
+                                 </div>
+                                <div class="progress" style="height:6px">
+                                    <div class="progress-bar bg-@s.Cor"
+                                         role="progressbar"
+                                         style="width:@(Math.Max(0, s.ValorTotal) * 100 / maxStat)%"
+                                         aria-valuenow="@s.ValorTotal"
+                                         aria-valuemin="0"
+                                         aria-valuemax="@maxStat">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    
+    <!-- Script do SignalR Client a partir da CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+    <script>
+        // Toggle dos formulários de resposta
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('toggle-resposta')) {
+                const targetId = e.target.dataset.target;
+                const target = document.getElementById(targetId);
+                if (target) {
+                    const isVisible = target.style.display !== 'none';
+                    target.style.display = isVisible ? 'none' : 'block';
+                    if (!isVisible) target.querySelector('textarea')?.focus();
+                }
+            }
+        });
+
+        // Configuração do Cliente SignalR
+        const buildId = @build.Id;
+        const currentUsername = '@(utilizadorAtual?.UserName ?? "")';
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/commentsHub")
+            .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Warning)
+            .build();
+
+        connection.start().then(function () {
+            // Entrar no grupo da build específica
+            connection.invoke("JoinBuildGroup", buildId).catch(err => console.error(err));
+        }).catch(err => console.error("Erro ao conectar SignalR:", err));
+
+        // Ouvir novos comentários em tempo real
+        connection.on("ReceiveComment", function (data) {
+            // Incrementar contador
+            const contadorEl = document.getElementById('comentarios-contador');
+            if (contadorEl) {
+                const total = parseInt(contadorEl.innerText) || 0;
+                contadorEl.innerText = total + 1;
+            }
+
+            // Remover aviso de "Sem comentários"
+            const semComentariosAviso = document.getElementById('sem-comentarios-aviso');
+            if (semComentariosAviso) {
+                semComentariosAviso.remove();
+            }
+
+            // Converter data para legível
+            const date = new Date(data.timestamp);
+            const dateStr = date.toLocaleDateString('pt-PT') + ' ' + date.toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'});
+
+            // HTML para o novo comentário
+            const isMyComment = (currentUsername !== "" && data.userName === currentUsername);
+            const deleteBtnHtml = isMyComment || @(User.IsInRole("Administrator") ? "true" : "false") 
+                ? `<span class="badge bg-light text-muted border small">Novo (Recarrega para ações)</span>` 
+                : '';
+
+            // Se for comentário raiz
+            if (!data.parentId) {
+                const newCommentHtml = `
+                    <div class="mb-3 new-comment-highlight" style="animation: fadeInHighlight 2s ease;">
+                        <div class="border rounded p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <strong class="small">${data.userName}</strong>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small class="text-muted">${dateStr}</small>
+                                    ${deleteBtnHtml}
+                                </div>
+                            </div>
+                            <p class="mb-3 small" style="white-space: pre-line">${data.commentText}</p>
+                            <div class="ms-3 ps-3 border-start mb-3" id="respostas-container-new">
+                            </div>
+                            <small class="text-muted small">Recarrega a página para responder a este comentário.</small>
+                        </div>
+                    </div>`;
+
+                const listaEl = document.getElementById('lista-comentarios');
+                if (listaEl) {
+                    listaEl.insertAdjacentHTML('afterbegin', newCommentHtml);
+                }
+            } else {
+                // Se for uma resposta
+                const respostaHtml = `
+                    <div class="mb-2 new-comment-highlight" style="animation: fadeInHighlight 2s ease;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <strong class="small">${data.userName}</strong>
+                            <div class="d-flex align-items-center gap-2">
+                                <small class="text-muted">${dateStr}</small>
+                                ${deleteBtnHtml}
+                            </div>
+                        </div>
+                        <p class="mb-0 small" style="white-space: pre-line">${data.commentText}</p>
+                    </div>`;
+
+                const containerEl = document.getElementById(`respostas-container-${data.parentId}`);
+                if (containerEl) {
+                    containerEl.insertAdjacentHTML('beforeend', respostaHtml);
+                }
+            }
+        });
+    </script>
+
+    <style>
+        @@keyframes fadeInHighlight {
+            0% { background-color: rgba(25, 135, 84, 0.15); }
+            100% { background-color: transparent; }
+        }
+        .new-comment-highlight {
+            border-radius: 6px;
+        }
+    </style>
+}

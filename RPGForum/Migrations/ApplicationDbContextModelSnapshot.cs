@@ -257,6 +257,12 @@ namespace RPGForum.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("StatAfetada")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StatBonus")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Type")
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
@@ -284,6 +290,12 @@ namespace RPGForum.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("StatAfetada")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StatBonus")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Type")
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
@@ -297,9 +309,6 @@ namespace RPGForum.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CharClassId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("CharacterId")
@@ -323,19 +332,15 @@ namespace RPGForum.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("UtilizadorID")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CharClassId");
+                    b.HasIndex("CharacterId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UtilizadorID");
 
                     b.ToTable("Builds");
                 });
@@ -520,12 +525,12 @@ namespace RPGForum.Migrations
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@MAIL.PT",
-                            NormalizedUserName = "ADMIN@MAIL.PT",
+                            NormalizedUserName = "ADMIN",
                             PasswordHash = "AQAAAAEAACcQAAAAEHX9OhBfKGUsbLTayhBCZ3WRcp+X+ivBA00sBQI5YG2NPaVbTJsVKE9jOgm/4Sb2RQ==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "1bcbd0a7-5c9d-4510-811a-cd5eee6c0dbe",
                             TwoFactorEnabled = false,
-                            UserName = "admin@mail.pt",
+                            UserName = "admin",
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Role = "Administrator"
                         });
@@ -586,13 +591,13 @@ namespace RPGForum.Migrations
                 {
                     b.HasOne("RPGForum.Models.Personagens", "CharClass")
                         .WithMany("Builds")
-                        .HasForeignKey("CharClassId")
+                        .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RPGForum.Models.Utilizadores", "User")
                         .WithMany("Builds")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UtilizadorID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

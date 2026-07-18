@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RPGForum.Models
@@ -31,6 +31,9 @@ namespace RPGForum.Models
         /// </summary>
         [MaxLength(512)]
         public string? ImageUrl { get; set; }
+
+        public string? StatAfetada { get; set; }
+        public string? StatBonus { get; set; }
 
         public ICollection<BuildAccessory> BuildAccessories { get; set; } = new List<BuildAccessory>();
     }
