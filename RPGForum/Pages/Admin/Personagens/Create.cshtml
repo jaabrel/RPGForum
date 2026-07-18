@@ -1,7 +1,7 @@
 @page
 @model RPGForum.Pages.Admin.Personagens.CreateModel
 @{
-    ViewData["Title"] = "Criar Personagem / Classe";
+    ViewData["Title"] = "Criar Personagem";
 }
 
 <div class="container mt-4">
@@ -9,21 +9,21 @@
         <div class="col-md-8">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0 h5">🛡️ Criar Nova Personagem / Classe</h3>
+                    <h3 class="mb-0 h5">🛡️ Criar Nova Personagem</h3>
                 </div>
                 <div class="card-body">
                     <form method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="mb-3">
-                            <label asp-for="Personagem.Name" class="form-label fw-bold">Nome da Classe</label>
-                            <input asp-for="Personagem.Name" class="form-control" placeholder="Ex: Guerreiro, Mago, Arqueiro..." />
+                            <label asp-for="Personagem.Name" class="form-label fw-bold">Nome da Personagem</label>
+                            <input asp-for="Personagem.Name" class="form-control" placeholder="Ex: Goku, Ichigo, Sonic..." />
                             <span asp-validation-for="Personagem.Name" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Personagem.Description" class="form-label fw-bold">Descrição</label>
-                            <textarea asp-for="Personagem.Description" class="form-control" rows="4" placeholder="Descreva as características principais desta classe..."></textarea>
+                            <textarea asp-for="Personagem.Description" class="form-control" rows="4" placeholder="Descreva as características principais desta personagem..."></textarea>
                             <span asp-validation-for="Personagem.Description" class="text-danger small"></span>
                         </div>
 

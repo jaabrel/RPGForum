@@ -51,6 +51,30 @@
                 </div>
             </div>
 
+            <div class="mb-4">
+                <h5 class="fw-bold border-bottom pb-2 mb-3">📈 Bónus de Estatísticas</h5>
+                <div class="p-3 bg-light rounded border">
+                    @if (string.IsNullOrEmpty(Model.Arma.StatAfetada) || string.IsNullOrEmpty(Model.Arma.StatBonus))
+                    {
+                        <span class="text-muted small">Esta arma não fornece bónus de atributos.</span>
+                    }
+                    else
+                    {
+                        var stats = Model.Arma.StatAfetada.Split(',');
+                        var bonuses = Model.Arma.StatBonus.Split(',');
+                        <ul class="list-unstyled mb-0">
+                            @for (int i = 0; i < Math.Min(stats.Length, bonuses.Length); i++)
+                            {
+                                <li>
+                                    <span class="badge bg-success me-2">+@bonuses[i]</span>
+                                    <strong>@stats[i]</strong>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+
             <!-- Actions -->
             <div class="d-flex gap-2 pt-3 border-top">
                 <a asp-page="./Edit" asp-route-id="@Model.Arma.Id" class="btn btn-primary flex-grow-1">Editar Arma</a>

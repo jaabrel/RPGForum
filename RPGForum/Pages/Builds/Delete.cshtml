@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+@page "{id:int}"
 @model RPGForum.Pages.Builds.DeleteModel
 @{
     ViewData["Title"] = "Apagar Build";
@@ -23,7 +23,7 @@
                 <p class="text-danger fw-semibold fs-5">@Model.Build.Title</p>
 
                 <ul class="list-unstyled text-muted small mb-4">
-                    <li><strong>Classe:</strong> @Model.Build.CharClass?.Name</li>
+                    <li><strong>Personagem:</strong> @Model.Build.CharClass?.Name</li>
                     <li><strong>Nível:</strong> @Model.Build.Level</li>
                     <li><strong>Gostos:</strong> @Model.Build.Likes.Count</li>
                     <li><strong>Comentários:</strong> @Model.Build.Comments.Count</li>

@@ -72,6 +72,7 @@ namespace RPGForum.Pages.Builds
             ModelState.Remove("Build.User");
             ModelState.Remove("Build.CharClass");
             ModelState.Remove("Build.Stats");
+            ModelState.Remove("Stats.Build");
 
             if (!ModelState.IsValid)
             {

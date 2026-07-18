@@ -1,7 +1,7 @@
 @page
 @model RPGForum.Pages.Admin.Personagens.DeleteModel
 @{
-    ViewData["Title"] = "Eliminar Personagem / Classe";
+    ViewData["Title"] = "Eliminar Personagem";
 }
 
 <div class="container mt-4">
@@ -14,7 +14,7 @@
                 <div class="card-body">
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-                    <p class="fs-5">Tem a certeza de que deseja eliminar esta classe de personagem?</p>
+                    <p class="fs-5">Tem a certeza de que deseja eliminar esta personagem?</p>
                     
                     <div class="bg-light p-3 rounded mb-4">
                         <p class="mb-1"><strong>Nome:</strong> @Model.Personagens.Name</p>
@@ -25,7 +25,7 @@
                     {
                         <div class="alert alert-warning">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            <strong>Aviso:</strong> Esta classe está associada a <strong>@Model.BuildsCount</strong> build(s).
+                            <strong>Aviso:</strong> Esta personagem está associada a <strong>@Model.BuildsCount</strong> build(s).
                             A eliminação está bloqueada por segurança.
                         </div>
                     }

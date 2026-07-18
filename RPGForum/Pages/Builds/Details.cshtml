@@ -133,7 +133,6 @@
         <div class="card" id="comentarios">
             <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
                 <span>💬 Comentários (<span id="comentarios-contador">@build.Comments.Count</span>)</span>
-                <span class="badge bg-success d-none" id="signalr-status">SignalR Ligado</span>
             </div>
             <div class="card-body">
 
@@ -294,47 +293,188 @@
 
     </div>
 
-    <!-- ===== COLUNA LATERAL: ESTATÍSTICAS ===== -->
+    <!-- ===== COLUNA LATERAL: PERSONAGEM, EQUIPAMENTO E ESTATÍSTICAS ===== -->
     <div class="col-lg-4">
-        @if (build.Stats != null)
-        {
-            <div class="card sticky-top" style="top: 1rem;">
-                <div class="card-header fw-semibold">📊 Estatísticas</div>
-                <div class="card-body">
-                    @{
-                        var stats = new (string Nome, int Valor, string Cor)[]
+        <div class="d-flex flex-column gap-4 sticky-top" style="top: 1rem;">
+            
+            @if (build.CharClass != null)
+            {
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white fw-semibold">👤 Personagem</div>
+                    <div class="card-body text-center">
+                        @if (!string.IsNullOrEmpty(build.CharClass.ImageUrl))
                         {
-                            ("HP",          build.Stats.Hp,         "danger"),
-                            ("Força",       build.Stats.Strength,   "warning"),
-                            ("Defesa",      build.Stats.Defense,    "info"),
-                            ("Magia",       build.Stats.Magic,      "primary"),
-                            ("Resistência", build.Stats.Endurance,  "secondary"),
-                            ("Velocidade",  build.Stats.Speed,      "success"),
-                        };
-                        int maxStat = stats.Max(s => s.Valor);
-                        if (maxStat == 0) maxStat = 1;
-                    }
-                    @foreach (var s in stats)
+                            <img src="@build.CharClass.ImageUrl" alt="@build.CharClass.Name" 
+                                 class="img-fluid rounded mb-3" style="max-height: 180px; object-fit: contain;" />
+                        }
+                        <h5 class="fw-bold mb-1">@build.CharClass.Name</h5>
+                        <p class="text-muted small mb-0">@build.CharClass.Description</p>
+                    </div>
+                </div>
+            }
+
+            @if (build.Stats != null)
+            {
+                // Função local para fazer parse dos atributos de string delimitada por vírgula
+                Dictionary<string, int> ParseItemStats(string? affected, string? bonus)
+                {
+                    var dict = new Dictionary<string, int>();
+                    if (string.IsNullOrEmpty(affected) || string.IsNullOrEmpty(bonus)) return dict;
+                    var stats = affected.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    var values = bonus.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < Math.Min(stats.Length, values.Length); i++)
                     {
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between small mb-1">
-                                <span>@s.Nome</span>
-                                <strong>@s.Valor</strong>
-                             </div>
-                            <div class="progress" style="height:6px">
-                                <div class="progress-bar bg-@s.Cor"
-                                     role="progressbar"
-                                     style="width:@(s.Valor * 100 / maxStat)%"
-                                     aria-valuenow="@s.Valor"
-                                     aria-valuemin="0"
-                                     aria-valuemax="@maxStat">
+                        if (int.TryParse(values[i].Trim(), out int val))
+                        {
+                            var statName = stats[i].Trim().ToLower();
+                            dict[statName] = val;
+                        }
+                    }
+                    return dict;
+                }
+
+                int bonusHp = 0, bonusStrength = 0, bonusDefense = 0, bonusMagic = 0, bonusEndurance = 0, bonusSpeed = 0;
+
+                foreach (var bw in build.BuidWeapons)
+                {
+                    var dict = ParseItemStats(bw.Weapon?.StatAfetada, bw.Weapon?.StatBonus);
+                    foreach (var kvp in dict)
+                    {
+                        if (kvp.Key == "hp") bonusHp += kvp.Value;
+                        else if (kvp.Key == "força" || kvp.Key == "forca") bonusStrength += kvp.Value;
+                        else if (kvp.Key == "defesa") bonusDefense += kvp.Value;
+                        else if (kvp.Key == "magia") bonusMagic += kvp.Value;
+                        else if (kvp.Key == "resistência" || kvp.Key == "resistencia") bonusEndurance += kvp.Value;
+                        else if (kvp.Key == "velocidade") bonusSpeed += kvp.Value;
+                    }
+                }
+
+                foreach (var ba in build.BuildAccessories)
+                {
+                    var dict = ParseItemStats(ba.Accessory?.StatAfetada, ba.Accessory?.StatBonus);
+                    foreach (var kvp in dict)
+                    {
+                        if (kvp.Key == "hp") bonusHp += kvp.Value;
+                        else if (kvp.Key == "força" || kvp.Key == "forca") bonusStrength += kvp.Value;
+                        else if (kvp.Key == "defesa") bonusDefense += kvp.Value;
+                        else if (kvp.Key == "magia") bonusMagic += kvp.Value;
+                        else if (kvp.Key == "resistência" || kvp.Key == "resistencia") bonusEndurance += kvp.Value;
+                        else if (kvp.Key == "velocidade") bonusSpeed += kvp.Value;
+                    }
+                }
+
+                <!-- Card de Equipamentos Equipados -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white fw-semibold">🎒 Equipamento Equipado</div>
+                    <div class="card-body">
+                        <h6 class="fw-bold border-bottom pb-1">⚔️ Armas</h6>
+                        @if (!build.BuidWeapons.Any())
+                        {
+                            <p class="text-muted small mb-3">Nenhuma arma equipada.</p>
+                        }
+                        else
+                        {
+                            <ul class="list-unstyled mb-3 small">
+                                @foreach (var bw in build.BuidWeapons)
+                                {
+                                    <li class="mb-2">
+                                        <strong>@bw.Weapon?.Name</strong> <span class="badge bg-light text-dark border">@bw.Weapon?.Type</span>
+                                        @if (!string.IsNullOrEmpty(bw.Weapon?.StatAfetada) && !string.IsNullOrEmpty(bw.Weapon?.StatBonus))
+                                        {
+                                            var statsList = bw.Weapon.StatAfetada.Split(',');
+                                            var bonusList = bw.Weapon.StatBonus.Split(',');
+                                            <div class="text-success small ps-2">
+                                                @for (int i = 0; i < Math.Min(statsList.Length, bonusList.Length); i++)
+                                                {
+                                                    <span>+@bonusList[i] @statsList[i]</span>@(i < Math.Min(statsList.Length, bonusList.Length) - 1 ? ", " : "")
+                                                }
+                                            </div>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        }
+
+                        <h6 class="fw-bold border-bottom pb-1 mt-3">💎 Acessórios</h6>
+                        @if (!build.BuildAccessories.Any())
+                        {
+                            <p class="text-muted small">Nenhum acessório equipado.</p>
+                        }
+                        else
+                        {
+                            <ul class="list-unstyled mb-0 small">
+                                @foreach (var ba in build.BuildAccessories.OrderBy(ba => ba.SlotPosition))
+                                {
+                                    <li class="mb-2">
+                                        <strong>Slot @ba.SlotPosition: @ba.Accessory?.Name</strong> <span class="badge bg-light text-dark border">@ba.Accessory?.Type</span>
+                                        @if (!string.IsNullOrEmpty(ba.Accessory?.StatAfetada) && !string.IsNullOrEmpty(ba.Accessory?.StatBonus))
+                                        {
+                                            var statsList = ba.Accessory.StatAfetada.Split(',');
+                                            var bonusList = ba.Accessory.StatBonus.Split(',');
+                                            <div class="text-success small ps-2">
+                                                @for (int i = 0; i < Math.Min(statsList.Length, bonusList.Length); i++)
+                                                {
+                                                    <span>+@bonusList[i] @statsList[i]</span>@(i < Math.Min(statsList.Length, bonusList.Length) - 1 ? ", " : "")
+                                                }
+                                            </div>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+
+                <!-- Card de Estatísticas Calculadas -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header fw-semibold">📊 Estatísticas (Total)</div>
+                    <div class="card-body">
+                        @{
+                            int lvlBonus = build.Level * 2;
+                            var stats = new (string Nome, int ValorBase, int ValorTotal, string Cor)[]
+                            {
+                                ("HP",          build.Stats.Hp + lvlBonus,         build.Stats.Hp + lvlBonus + bonusHp,         "danger"),
+                                ("Força",       build.Stats.Strength + lvlBonus,   build.Stats.Strength + lvlBonus + bonusStrength,   "warning"),
+                                ("Defesa",      build.Stats.Defense + lvlBonus,    build.Stats.Defense + lvlBonus + bonusDefense,    "info"),
+                                ("Magia",       build.Stats.Magic + lvlBonus,      build.Stats.Magic + lvlBonus + bonusMagic,      "primary"),
+                                ("Resistência", build.Stats.Endurance + lvlBonus,  build.Stats.Endurance + lvlBonus + bonusEndurance,  "secondary"),
+                                ("Velocidade",  build.Stats.Speed + lvlBonus,      build.Stats.Speed + lvlBonus + bonusSpeed,      "success"),
+                            };
+                            // Escala máxima de pelo menos 100 para evitar que valores baixos preencham totalmente a barra
+                            int maxStat = Math.Max(100, stats.Max(s => s.ValorTotal));
+                        }
+                        @foreach (var s in stats)
+                        {
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span>@s.Nome</span>
+                                    <strong>
+                                        @s.ValorTotal
+                                        @if (s.ValorTotal > s.ValorBase)
+                                        {
+                                            <span class="text-success small fw-normal">(+@(s.ValorTotal - s.ValorBase))</span>
+                                        }
+                                        else if (s.ValorTotal < s.ValorBase)
+                                        {
+                                            <span class="text-danger small fw-normal">(@(s.ValorTotal - s.ValorBase))</span>
+                                        }
+                                    </strong>
+                                 </div>
+                                <div class="progress" style="height:6px">
+                                    <div class="progress-bar bg-@s.Cor"
+                                         role="progressbar"
+                                         style="width:@(Math.Max(0, s.ValorTotal) * 100 / maxStat)%"
+                                         aria-valuenow="@s.ValorTotal"
+                                         aria-valuemin="0"
+                                         aria-valuemax="@maxStat">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 
 </div>
@@ -372,10 +512,6 @@
             .build();
 
         connection.start().then(function () {
-            // Indicar status de conectado
-            const statusBadge = document.getElementById('signalr-status');
-            if (statusBadge) statusBadge.classList.remove('d-none');
-
             // Entrar no grupo da build específica
             connection.invoke("JoinBuildGroup", buildId).catch(err => console.error(err));
         }).catch(err => console.error("Erro ao conectar SignalR:", err));

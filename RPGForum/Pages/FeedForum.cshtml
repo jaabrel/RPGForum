@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model RPGForum.Pages.FeedForumModel
 @{
     ViewData["Title"] = "Fórum de Builds";
@@ -23,18 +23,28 @@
         <div class="card-body p-4">
             <form method="get">
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label fw-semibold text-secondary"><i class="bi bi-search me-1"></i>O que procuras?</label>
                         <input type="text" name="Pesquisa" value="@Model.Pesquisa"
                                class="form-control form-control-lg border-0 shadow-sm" placeholder="Título, descrição ou tags..." />
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-semibold text-secondary"><i class="bi bi-person-badge me-1"></i>Classe</label>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-secondary"><i class="bi bi-person-badge me-1"></i>Personagem</label>
                         <select name="PersonagemId" class="form-select form-select-lg border-0 shadow-sm">
-                            <option value="">Todas as Classes</option>
+                            <option value="">Todas as Personagens</option>
                             @foreach (var p in Model.Personagens)
                             {
                                 <option value="@p.Id" selected="@(Model.PersonagemId == p.Id)">@p.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-secondary"><i class="bi bi-people me-1"></i>Autor</label>
+                        <select name="UtilizadorID" class="form-select form-select-lg border-0 shadow-sm">
+                            <option value="">Todos</option>
+                            @foreach (var u in Model.Utilizadores)
+                            {
+                                <option value="@u.Id" selected="@(Model.UtilizadorID == u.Id)">@u.Username</option>
                             }
                         </select>
                     </div>
@@ -46,9 +56,8 @@
                             <option value="nivel" selected="@(Model.Ordenar == "nivel")">Nível mais Alto</option>
                         </select>
                     </div>
-                    <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1 shadow-sm fw-bold">Filtrar</button>
-                        <a asp-page="/FeedForum" class="btn btn-outline-secondary btn-lg shadow-sm" title="Limpar Filtros"><i class="bi bi-arrow-counterclockwise"></i></a>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold">Filtrar</button>
                     </div>
                 </div>
             </form>
@@ -81,7 +90,7 @@
             {
                 <div class="col">
                     <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden build-card-hover transition-all">
-                        <!-- Cabeçalho do Card: Classe e Nível -->
+                        <!-- Cabeçalho do Card: Personagem e Nível -->
                         <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
                             <span class="badge bg-dark text-white rounded-pill px-3 py-2 shadow-sm">
                                 <i class="bi bi-person-fill me-1"></i> @(build.CharClass?.Name ?? "Desconhecido")
@@ -131,6 +140,46 @@
                 </div>
             }
         </div>
+
+        <!-- Paginação -->
+        @if (Model.TotalPaginas > 1)
+        {
+            <nav aria-label="Navegação de páginas" class="mt-5 d-flex justify-content-center">
+                <ul class="pagination">
+                    <li class="page-item @(Model.TemPaginaAnterior ? "" : "disabled")">
+                        <a class="page-link" asp-page="/FeedForum" 
+                           asp-route-Pagina="@(Model.PaginaAtual - 1)" 
+                           asp-route-Pesquisa="@Model.Pesquisa"
+                           asp-route-PersonagemId="@Model.PersonagemId"
+                           asp-route-UtilizadorID="@Model.UtilizadorID"
+                           asp-route-Ordenar="@Model.Ordenar" aria-label="Anterior">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    @for (int i = 1; i <= Model.TotalPaginas; i++)
+                    {
+                        <li class="page-item @(i == Model.PaginaAtual ? "active" : "")">
+                            <a class="page-link" asp-page="/FeedForum" 
+                               asp-route-Pagina="@i"
+                               asp-route-Pesquisa="@Model.Pesquisa"
+                               asp-route-PersonagemId="@Model.PersonagemId"
+                               asp-route-UtilizadorID="@Model.UtilizadorID"
+                               asp-route-Ordenar="@Model.Ordenar">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.TemProximaPagina ? "" : "disabled")">
+                        <a class="page-link" asp-page="/FeedForum" 
+                           asp-route-Pagina="@(Model.PaginaAtual + 1)"
+                           asp-route-Pesquisa="@Model.Pesquisa"
+                           asp-route-PersonagemId="@Model.PersonagemId"
+                           asp-route-UtilizadorID="@Model.UtilizadorID"
+                           asp-route-Ordenar="@Model.Ordenar" aria-label="Seguinte">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
     }
 </div>
 

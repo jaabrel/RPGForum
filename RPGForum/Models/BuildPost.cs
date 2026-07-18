@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography.Pkcs;
 
@@ -8,10 +8,10 @@ namespace RPGForum.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey(nameof(Utilizadores))]
+        [ForeignKey(nameof(User))]
         public int UtilizadorID { get; set; }
 
-        [ForeignKey(nameof(Personagens))]
+        [ForeignKey(nameof(CharClass))]
         public int CharacterId { get; set; }
 
         [Required, MaxLength(50)]

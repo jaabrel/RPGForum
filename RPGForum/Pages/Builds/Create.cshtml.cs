@@ -49,6 +49,7 @@ namespace RPGForum.Pages.Builds
             ModelState.Remove("Build.User");
             ModelState.Remove("Build.CharClass");
             ModelState.Remove("Build.Stats");
+            ModelState.Remove("Stats.Build");
 
             if (!ModelState.IsValid)
             {
@@ -69,35 +70,44 @@ namespace RPGForum.Pages.Builds
             Build.CreatedAt = DateTime.UtcNow;
             Build.UpdatedAt = DateTime.UtcNow;
 
-            _context.Builds.Add(Build);
-            await _context.SaveChangesAsync();
+            // Associar estatísticas diretamente ao objeto Build (necessário porque Stats é obrigatório na relação 1-1)
+            Build.Stats = Stats;
 
-            // Adicionar estatísticas
-            Stats.BuildId = Build.Id;
-            _context.Estatisticas.Add(Stats);
+            // Inicializar coleções da Build
+            Build.BuidWeapons = new List<BuildWeapon>();
+            Build.BuildAccessories = new List<BuildAccessory>();
 
-            // Associar armas (muitos-para-muitos)
+            // Associar armas selecionadas
             foreach (var armaId in ArmasSelecionadas)
             {
-                _context.BuildWeapons.Add(new BuildWeapon
+                Build.BuidWeapons.Add(new BuildWeapon
                 {
-                    BuildId = Build.Id,
                     WeaponId = armaId
                 });
             }
 
-            // Associar acessórios (muitos-para-muitos)
+            // Associar acessórios selecionados
             for (int i = 0; i < AcessoriosSelecionados.Count; i++)
             {
-                _context.BuildAccessories.Add(new BuildAccessory
+                Build.BuildAccessories.Add(new BuildAccessory
                 {
-                    BuildId = Build.Id,
                     AccessoryId = AcessoriosSelecionados[i],
                     SlotPosition = i + 1
                 });
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Builds.Add(Build);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                var message = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                ModelState.AddModelError("", $"Erro ao gravar a build na base de dados: {message}");
+                await CarregarListasAsync();
+                return Page();
+            }
 
             TempData["Sucesso"] = $"Build \"{Build.Title}\" criada com sucesso!";
             return RedirectToPage("Index");

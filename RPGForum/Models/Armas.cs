@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace RPGForum.Models
 {
@@ -14,6 +14,9 @@ namespace RPGForum.Models
         [MaxLength (250)]
         public string? Description { get; set; }
         public string? ImageUrl { get; set; }
+
+        public string? StatAfetada { get; set; }
+        public string? StatBonus { get; set; }
 
         public ICollection<BuildWeapon> BuildWeapons { get; set; } = new List<BuildWeapon>();
 
