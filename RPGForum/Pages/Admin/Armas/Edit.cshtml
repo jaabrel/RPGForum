@@ -1,4 +1,4 @@
-@page
+@page "{id:int}"
 @model RPGForum.Pages.Admin.Armas.EditModel
 @{
     ViewData["Title"] = "Editar Arma";
@@ -34,10 +34,25 @@
                             <span asp-validation-for="Arma.Description" class="text-danger small"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Arma.ImageUrl" class="form-label fw-bold">URL da Imagem</label>
-                            <input asp-for="Arma.ImageUrl" class="form-control" />
-                            <span asp-validation-for="Arma.ImageUrl" class="text-danger small"></span>
+                        <!-- Bónus de Estatísticas -->
+                        <div class="card mb-4 border border-light shadow-sm">
+                            <div class="card-header bg-dark text-white fw-semibold">📈 Bónus de Estatísticas</div>
+                            <div class="card-body">
+                                <p class="text-muted small">Insira os bónus de atributos fornecidos por esta arma (deixe em branco ou 0 para atributos não afetados).</p>
+                                <div class="row row-cols-2 row-cols-md-3 g-3">
+                                    @{
+                                        var availableStats = new[] { "HP", "Força", "Defesa", "Magia", "Resistência", "Velocidade" };
+                                    }
+                                    @foreach (var stat in availableStats)
+                                    {
+                                        var val = Model.SelectedStats.ContainsKey(stat) ? Model.SelectedStats[stat] : 0;
+                                        <div>
+                                            <label class="form-label fw-bold small">@stat</label>
+                                            <input type="number" name="SelectedStats[@stat]" class="form-control" value="@val" />
+                                        </div>
+                                    }
+                                </div>
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">

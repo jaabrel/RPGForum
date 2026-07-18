@@ -1,0 +1,65 @@
+@page
+@model SobreModel
+@{
+    ViewData["Title"] = "Sobre o Projeto";
+}
+
+<div class="container py-4">
+    <!-- Academic and Demo Section -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="glass-card p-4 h-100">
+                <h3 class="title mb-3 fs-4">📚 Sobre o Projeto Académico</h3>
+                <p class="text-muted">
+                    Este fórum foi desenvolvido como um trabalho prático focado na criação de uma plataforma web interativa, robusta e moderna, utilizando tecnologias consolidadas de desenvolvimento backend e frontend.
+                </p>
+                <div class="table-responsive mt-3">
+                    <table class="table table-borderless align-middle mb-0">
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="ps-0" style="width: 25%">Curso:</th>
+                                <td>Licenciatura em Engenharia Informática</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="ps-0">Disciplina:</th>
+                                <td>Desenvolvimento Web (2025/2026)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="ps-0">Autores:</th>
+                                <td>
+                                    <ul class="list-unstyled mb-0">
+                                        <li>👨‍💻 João Alexandre de Abreu (24844)</li>
+                                        <li>👨‍💻 Rodrigo Mendes Pinheiro (26402)</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100 border-warning" style="background: rgba(245, 158, 11, 0.03);">
+                <h3 class="title mb-3 fs-4 text-warning">🔑 Acesso de Demonstração</h3>
+                <p class="text-muted small">
+                    Podes usar a seguinte conta administrativa pré-configurada para testar a moderação, criar novas personagens e gerir a plataforma:
+                </p>
+                <div class="p-3 bg-white rounded-3 border border-warning border-opacity-25 shadow-sm">
+                    <div class="mb-2">
+                        <span class="text-muted small d-block">Utilizador / Email:</span>
+                        <code class="fs-6 text-primary">admin@mail.pt</code>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Palavra-passe:</span>
+                        <code class="fs-6 text-primary">Aa0_aa</code>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <a asp-area="Identity" asp-page="/Account/Login" class="friendly-link text-warning fw-bold">
+                        Entrar agora &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

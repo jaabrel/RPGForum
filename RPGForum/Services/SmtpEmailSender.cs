@@ -13,6 +13,11 @@ namespace RPGForum.Services
     {
         private readonly IConfiguration _config;
 
+        public SmtpEmailSender(IConfiguration config)
+        {
+            _config = config;
+        }
+
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             var host = _config["Smtp:Host"];

@@ -1,63 +1,158 @@
-@page
+@page "{id:int}"
 @model RPGForum.Pages.Build.EditModel
-
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Build";
 }
 
-<h1>Edit</h1>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
 
-<h4>Build</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Build.Id" />
-            <div class="form-group">
-                <label asp-for="Build.UtilizadorID" class="control-label"></label>
-                <input asp-for="Build.UtilizadorID" class="form-control" />
-                <span asp-validation-for="Build.UtilizadorID" class="text-danger"></span>
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="Index">As Minhas Builds</a></li>
+                <li class="breadcrumb-item active">Editar</li>
+            </ol>
+        </nav>
+
+        <h1 class="h2 mb-4">Editar Build</h1>
+
+        <form method="post" asp-route-id="@Model.Build.Id">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <!-- Informação principal -->
+            <div class="card mb-4">
+                <div class="card-header fw-semibold">Informação Principal</div>
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label asp-for="Build.Title" class="form-label">Título <span class="text-danger">*</span></label>
+                        <input asp-for="Build.Title" class="form-control" />
+                        <span asp-validation-for="Build.Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Build.Description" class="form-label">Descrição</label>
+                        <textarea asp-for="Build.Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Build.Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Build.CharacterId" class="form-label">Personagem <span class="text-danger">*</span></label>
+                            <select asp-for="Build.CharacterId" asp-items="Model.PersonagensSelect" class="form-select">
+                                <option value="">-- Seleciona uma personagem --</option>
+                            </select>
+                            <span asp-validation-for="Build.CharacterId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Build.Level" class="form-label">Nível (1-100)</label>
+                            <input asp-for="Build.Level" class="form-control" type="number" min="1" max="100" />
+                            <span asp-validation-for="Build.Level" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Build.CharacterId" class="control-label"></label>
-                <input asp-for="Build.CharacterId" class="form-control" />
-                <span asp-validation-for="Build.CharacterId" class="text-danger"></span>
+
+            <!-- Estatísticas -->
+            <div class="card mb-4">
+                <div class="card-header fw-semibold">Estatísticas Base</div>
+                <div class="card-body">
+                    <div class="row row-cols-2 row-cols-md-3 g-3">
+                        <div>
+                            <label asp-for="Stats.Hp" class="form-label">HP</label>
+                            <input asp-for="Stats.Hp" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Strength" class="form-label">Força</label>
+                            <input asp-for="Stats.Strength" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Defense" class="form-label">Defesa</label>
+                            <input asp-for="Stats.Defense" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Magic" class="form-label">Magia</label>
+                            <input asp-for="Stats.Magic" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Endurance" class="form-label">Resistência</label>
+                            <input asp-for="Stats.Endurance" class="form-control" type="number" min="1" />
+                        </div>
+                        <div>
+                            <label asp-for="Stats.Speed" class="form-label">Velocidade</label>
+                            <input asp-for="Stats.Speed" class="form-control" type="number" min="1" />
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-<span class="text-danger">*</span>
-                <label asp-for="Build.Title" class="control-label"></label>
-                <input asp-for="Build.Title" class="form-control" aria-required="true"/>
-                <span asp-validation-for="Build.Title" class="text-danger"></span>
+
+            <!-- Armas -->
+            <div class="card mb-4 border-0 shadow-sm rounded-4">
+                <div class="card-header bg-dark text-white fw-semibold py-3">Armas da Build</div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label asp-for="ArmasNomes" class="form-label fw-bold"><i class="bi bi-shield-fill me-1"></i>Armas associadas <span class="text-muted small">(separadas por vírgula)</span></label>
+                        <input asp-for="ArmasNomes" id="ArmasNomes" class="form-control form-control-lg border-2 shadow-none rounded-3" placeholder="Ex: Espada Longa, Cajado Arcano..." />
+                        <span asp-validation-for="ArmasNomes" class="text-danger small"></span>
+                    </div>
+                    @if (Model.TodasArmas.Any())
+                    {
+                        <div class="mt-3">
+                            <span class="text-secondary small d-block mb-2 fw-semibold">Sugestões de Armas (clica para adicionar):</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var arma in Model.TodasArmas)
+                                {
+                                    <span class="badge bg-light text-dark border py-2 px-3 rounded-pill cursor-pointer hover-shadow transition-all" 
+                                          style="cursor: pointer;"
+                                          onclick="var el = document.getElementById('ArmasNomes'); var cur = el.value.trim(); el.value = cur ? cur + ', ' + '@arma.Name' : '@arma.Name';">
+                                        @arma.Name <small class="text-muted">(@arma.Type)</small>
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Build.Description" class="control-label"></label>
-                <input asp-for="Build.Description" class="form-control" />
-                <span asp-validation-for="Build.Description" class="text-danger"></span>
+
+            <!-- Acessórios -->
+            <div class="card mb-4 border-0 shadow-sm rounded-4">
+                <div class="card-header bg-dark text-white fw-semibold py-3">Acessórios da Build</div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label asp-for="AcessoriosNomes" class="form-label fw-bold"><i class="bi bi-gem me-1"></i>Acessórios associados <span class="text-muted small">(separados por vírgula)</span></label>
+                        <input asp-for="AcessoriosNomes" id="AcessoriosNomes" class="form-control form-control-lg border-2 shadow-none rounded-3" placeholder="Ex: Anel da Força, Colar da Vida..." />
+                        <span asp-validation-for="AcessoriosNomes" class="text-danger small"></span>
+                    </div>
+                    @if (Model.TodosAcessorios.Any())
+                    {
+                        <div class="mt-3">
+                            <span class="text-secondary small d-block mb-2 fw-semibold">Sugestões de Acessórios (clica para adicionar):</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var acessorio in Model.TodosAcessorios)
+                                {
+                                    <span class="badge bg-light text-dark border py-2 px-3 rounded-pill cursor-pointer hover-shadow transition-all" 
+                                          style="cursor: pointer;"
+                                          onclick="var el = document.getElementById('AcessoriosNomes'); var cur = el.value.trim(); el.value = cur ? cur + ', ' + '@acessorio.Name' : '@acessorio.Name';">
+                                        @acessorio.Name <small class="text-muted">(@acessorio.Type)</small>
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Build.Level" class="control-label"></label>
-                <input asp-for="Build.Level" class="form-control" />
-                <span asp-validation-for="Build.Level" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Build.CreatedAt" class="control-label"></label>
-                <input asp-for="Build.CreatedAt" class="form-control" />
-                <span asp-validation-for="Build.CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Build.UpdatedAt" class="control-label"></label>
-                <input asp-for="Build.UpdatedAt" class="form-control" />
-                <span asp-validation-for="Build.UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a asp-page="Index" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar Alterações</button>
             </div>
         </form>
+
     </div>
 </div>
 
-<div>
-    <a asp-page="./Index">Back to List</a>
-</div>
-
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

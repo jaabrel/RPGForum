@@ -1,64 +1,46 @@
-@page
+@page "{id:int}"
 @model RPGForum.Pages.Build.DeleteModel
-
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Apagar Build";
 }
 
-<h1>Delete</h1>
+<div class="row justify-content-center">
+    <div class="col-lg-6">
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Build</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.UtilizadorID)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.UtilizadorID)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.CharacterId)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.CharacterId)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.Title)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.Title)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.Description)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.Level)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.Level)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.CreatedAt)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.CreatedAt)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Build.UpdatedAt)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Build.UpdatedAt)
-        </dd>
-    </dl>
-    
-    <form method="post">
-        <input type="hidden" asp-for="Build.Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-page="./Index">Back to List</a>
-    </form>
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="Index">As Minhas Builds</a></li>
+                <li class="breadcrumb-item active">Apagar</li>
+            </ol>
+        </nav>
+
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white fw-semibold">
+                Confirmar Eliminação
+            </div>
+            <div class="card-body">
+                <p class="mb-1">Tens a certeza que queres apagar a seguinte build?</p>
+                <p class="text-danger fw-semibold fs-5">@Model.Build.Title</p>
+
+                <ul class="list-unstyled text-muted small mb-4">
+                    <li><strong>Personagem:</strong> @Model.Build.CharClass?.Name</li>
+                    <li><strong>Nível:</strong> @Model.Build.Level</li>
+                    <li><strong>Gostos:</strong> @Model.Build.Likes.Count</li>
+                    <li><strong>Comentários:</strong> @Model.Build.Comments.Count</li>
+                </ul>
+
+                <div class="alert alert-warning small" role="alert">
+                    Esta ação é irreversível. Todos os comentários e gostos associados serão eliminados.
+                </div>
+
+                <form method="post" asp-route-id="@Model.Build.Id">
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a asp-page="Index" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-danger">Apagar definitivamente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
 </div>

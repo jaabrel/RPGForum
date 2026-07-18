@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model RPGForum.Pages.FeedForumModel
 @{
     ViewData["Title"] = "Fórum de Builds";
@@ -12,7 +12,7 @@
         </div>
         @if (User.Identity!.IsAuthenticated)
         {
-            <a asp-page="/Builds/Create" class="btn btn-primary shadow-sm px-4">
+            <a asp-page="/Build/Create" class="btn btn-primary shadow-sm px-4">
                 <i class="bi bi-plus-lg me-2"></i>Publicar Build
             </a>
         }
@@ -23,20 +23,25 @@
         <div class="card-body p-4">
             <form method="get">
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label fw-semibold text-secondary"><i class="bi bi-search me-1"></i>O que procuras?</label>
                         <input type="text" name="Pesquisa" value="@Model.Pesquisa"
                                class="form-control form-control-lg border-0 shadow-sm" placeholder="Título, descrição ou tags..." />
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-semibold text-secondary"><i class="bi bi-person-badge me-1"></i>Classe</label>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-secondary"><i class="bi bi-person-badge me-1"></i>Personagem</label>
                         <select name="PersonagemId" class="form-select form-select-lg border-0 shadow-sm">
-                            <option value="">Todas as Classes</option>
+                            <option value="">Todas as Personagens</option>
                             @foreach (var p in Model.Personagens)
                             {
                                 <option value="@p.Id" selected="@(Model.PersonagemId == p.Id)">@p.Name</option>
                             }
                         </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-secondary"><i class="bi bi-people me-1"></i>Autor</label>
+                        <input type="text" name="UtilizadorNome" value="@Model.UtilizadorNome"
+                               class="form-control form-control-lg border-0 shadow-sm" placeholder="Nome do autor..." />
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold text-secondary"><i class="bi bi-sort-down me-1"></i>Ordenar</label>
@@ -46,9 +51,8 @@
                             <option value="nivel" selected="@(Model.Ordenar == "nivel")">Nível mais Alto</option>
                         </select>
                     </div>
-                    <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1 shadow-sm fw-bold">Filtrar</button>
-                        <a asp-page="/FeedForum" class="btn btn-outline-secondary btn-lg shadow-sm" title="Limpar Filtros"><i class="bi bi-arrow-counterclockwise"></i></a>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold">Filtrar</button>
                     </div>
                 </div>
             </form>
@@ -66,7 +70,7 @@
             <p class="text-muted">Não encontrámos resultados para os teus filtros. Tenta pesquisar por outras palavras.</p>
             @if (User.Identity!.IsAuthenticated)
             {
-                <a asp-page="/Builds/Create" class="btn btn-outline-primary mt-3 px-4 rounded-pill">Sê o primeiro a publicar!</a>
+                <a asp-page="/Build/Create" class="btn btn-outline-primary mt-3 px-4 rounded-pill">Sê o primeiro a publicar!</a>
             }
         </div>
     }
@@ -81,7 +85,7 @@
             {
                 <div class="col">
                     <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden build-card-hover transition-all">
-                        <!-- Cabeçalho do Card: Classe e Nível -->
+                        <!-- Cabeçalho do Card: Personagem e Nível -->
                         <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
                             <span class="badge bg-dark text-white rounded-pill px-3 py-2 shadow-sm">
                                 <i class="bi bi-person-fill me-1"></i> @(build.CharClass?.Name ?? "Desconhecido")
@@ -94,7 +98,7 @@
                         <!-- Corpo do Card -->
                         <div class="card-body">
                             <h4 class="card-title fw-bold mb-3 line-clamp-2" style="height: 3rem;">
-                                <a asp-page="/Builds/Details" asp-route-id="@build.Id"
+                                <a asp-page="/Build/Details" asp-route-id="@build.Id"
                                    class="text-decoration-none text-dark stretched-link">
                                     @build.Title
                                 </a>
@@ -131,6 +135,46 @@
                 </div>
             }
         </div>
+
+        <!-- Paginação -->
+        @if (Model.TotalPaginas > 1)
+        {
+            <nav aria-label="Navegação de páginas" class="mt-5 d-flex justify-content-center">
+                <ul class="pagination">
+                    <li class="page-item @(Model.TemPaginaAnterior ? "" : "disabled")">
+                        <a class="page-link" asp-page="/FeedForum" 
+                           asp-route-Pagina="@(Model.PaginaAtual - 1)" 
+                           asp-route-Pesquisa="@Model.Pesquisa"
+                           asp-route-PersonagemId="@Model.PersonagemId"
+                           asp-route-UtilizadorNome="@Model.UtilizadorNome"
+                           asp-route-Ordenar="@Model.Ordenar" aria-label="Anterior">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    @for (int i = 1; i <= Model.TotalPaginas; i++)
+                    {
+                        <li class="page-item @(i == Model.PaginaAtual ? "active" : "")">
+                            <a class="page-link" asp-page="/FeedForum" 
+                               asp-route-Pagina="@i"
+                               asp-route-Pesquisa="@Model.Pesquisa"
+                               asp-route-PersonagemId="@Model.PersonagemId"
+                               asp-route-UtilizadorNome="@Model.UtilizadorNome"
+                               asp-route-Ordenar="@Model.Ordenar">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.TemProximaPagina ? "" : "disabled")">
+                        <a class="page-link" asp-page="/FeedForum" 
+                           asp-route-Pagina="@(Model.PaginaAtual + 1)"
+                           asp-route-Pesquisa="@Model.Pesquisa"
+                           asp-route-PersonagemId="@Model.PersonagemId"
+                           asp-route-UtilizadorNome="@Model.UtilizadorNome"
+                           asp-route-Ordenar="@Model.Ordenar" aria-label="Seguinte">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
     }
 </div>
 
