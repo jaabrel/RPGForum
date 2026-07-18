@@ -4,7 +4,7 @@ using System.Security.Cryptography.Pkcs;
 
 namespace RPGForum.Models
 {
-    public class BuildPost
+    public class Build
     {
         public int Id { get; set; }
 

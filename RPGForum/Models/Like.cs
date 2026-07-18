@@ -6,7 +6,7 @@ namespace RPGForum.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey(nameof(BuildPost))]
+        [ForeignKey(nameof(Models.Build))]
         public int BuildId { get; set; }
 
         [ForeignKey(nameof(Utilizadores))]
@@ -14,7 +14,7 @@ namespace RPGForum.Models
 
         public DateTime CretatedAt { get; set; } = DateTime.UtcNow;
 
-        public BuildPost Build { get; set; } = null!;
+        public Build Build { get; set; } = null!;
         public Utilizadores User { get; set; } = null!;
     }
 }

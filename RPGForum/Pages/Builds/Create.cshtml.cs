@@ -22,7 +22,7 @@ namespace RPGForum.Pages.Builds
         }
 
         [BindProperty]
-        public BuildPost Build { get; set; } = new();
+        public Build Build { get; set; } = new();
 
         [BindProperty]
         public Estatisticas Stats { get; set; } = new();

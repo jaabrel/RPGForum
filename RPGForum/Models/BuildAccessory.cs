@@ -7,7 +7,7 @@
 
         public int SlotPosition { get; set; } = 1;
 
-        public BuildPost Build { get; set; } = null!;
+        public Build Build { get; set; } = null!;
         public Acessorios Accessory { get; set; } = null!;
     }
 }

@@ -20,7 +20,7 @@ namespace RPGForum.Pages.Builds
             _userManager = userManager;
         }
 
-        public BuildPost Build { get; set; } = null!;
+        public Build Build { get; set; } = null!;
 
         public async Task<IActionResult> OnGetAsync(int id)
         {

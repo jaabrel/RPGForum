@@ -7,7 +7,7 @@ namespace RPGForum.Models
 
         public int Id { get; set; }
 
-        [ForeignKey(nameof(BuildPost))]
+        [ForeignKey(nameof(Models.Build))]
         public int BuildId { get; set; }
 
         public int Hp { get; set; } = 10;
@@ -19,7 +19,7 @@ namespace RPGForum.Models
 
 
 
-        public BuildPost Build { get; set; } = null!;
+        public Build Build { get; set; } = null!;
 
     }
 }

@@ -10,7 +10,7 @@ namespace RPGForum.Data
 
         public DbSet<Utilizadores> Utilizadores { get; set; }
         public DbSet<Personagens> Personagens { get; set; }
-        public DbSet<BuildPost> Builds { get; set; }
+        public DbSet<Build> Builds { get; set; }
         public DbSet<Estatisticas> Estatisticas { get; set; }
         public DbSet<Armas> Armas { get; set; }
         public DbSet<Acessorios> Acessorios { get; set; }
@@ -69,11 +69,11 @@ namespace RPGForum.Data
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentId)
                 .OnDelete(DeleteBehavior.Restrict);
-            builder.Entity<BuildPost>()
+            builder.Entity<Build>()
                 .HasMany(b => b.Comments)
                 .WithOne(c => c.Build)
                 .OnDelete(DeleteBehavior.Cascade);
-            builder.Entity<BuildPost>()
+            builder.Entity<Build>()
                 .HasMany(b => b.Likes)
                 .WithOne(L => L.Build)
                 .OnDelete(DeleteBehavior.Cascade);

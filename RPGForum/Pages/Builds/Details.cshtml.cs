@@ -20,7 +20,7 @@ namespace RPGForum.Pages.Builds
         }
 
         // --- Dados da página ---
-        public BuildPost Build { get; set; } = null!;
+        public Build Build { get; set; } = null!;
         public bool IsAutor { get; set; }
         public bool JaDeuGosto { get; set; }
         public Utilizadores? UtilizadorAtual { get; set; }
@@ -151,7 +151,7 @@ namespace RPGForum.Pages.Builds
 
         // --- Helpers privados ---
 
-        private async Task<BuildPost?> CarregarBuildAsync(int id)
+        private async Task<Build?> CarregarBuildAsync(int id)
         {
             return await _context.Builds
                 .Include(b => b.User)
