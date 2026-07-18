@@ -152,5 +152,11 @@ namespace RPGForum.Pages.Build
             TodasArmas = await _context.Armas.OrderBy(a => a.Name).ToListAsync();
             TodosAcessorios = await _context.Acessorios.OrderBy(a => a.Name).ToListAsync();
         }
+        private void LoadLists()
+        {
+            PersonagensList = new SelectList(_context.Personagens, "Id", "Name");
+            AvailableWeapons = _context.Armas.ToList();
+            AvailableAccessories = _context.Acessorios.ToList();
+        }
     }
 }
