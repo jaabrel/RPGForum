@@ -10,7 +10,7 @@ namespace RPGForum.Models
         /// Role do Utilizador
         /// </summary>
         [MaxLength(20)]
-        public string Role {  get; set; } = "Registered";
+        public string Role { get; set; } = "Registered";
 
         /// <summary>
         /// Data de criação do Utilizador

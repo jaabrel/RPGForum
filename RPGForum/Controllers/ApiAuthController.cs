@@ -40,7 +40,8 @@ public class ApiAuthController : ControllerBase
             if (result.Succeeded)
             {
                 // Usa o teu TokenService para gerar o JWT
-                var token = _tokenService.GenerateToken(user); 
+                var roles = await _userManager.GetRolesAsync(user);
+                var token = _tokenService.GenerateToken(user, roles);
                 return Ok(new { token = token });
             }
         }

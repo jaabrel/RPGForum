@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Models;
 
@@ -75,29 +76,22 @@ namespace RPGForum.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "O nome de utilizador é obrigatório")]
+            [StringLength(30, ErrorMessage = "O nome de utilizador deve ter entre {2} e {1} caracteres.", MinimumLength = 3)]
+            [Display(Name = "Nome de Utilizador")]
+            public string Username { get; set; } = string.Empty;
+
+            [Required(ErrorMessage = "O email é obrigatório")]
+            [EmailAddress(ErrorMessage = "Formato de email inválido")]
             [Display(Name = "Email")]
-            public string Email { get; set; }
+            public string Email { get; set; } = string.Empty;
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "A senha é obrigatória")]
+            [StringLength(100, ErrorMessage = "A senha deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
-            public string Password { get; set; }
+            [Display(Name = "Senha")]
+            public string Password { get; set; } = string.Empty;
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [DataType(DataType.Password)]
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
@@ -118,6 +112,41 @@ namespace RPGForum.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+                // Verificar se o email já está em uso na tabela Utilizadores
+                var emailExists = await _context.Utilizadores.AnyAsync(u => u.Email == Input.Email);
+                if (emailExists)
+                {
+                    ModelState.AddModelError("Input.Email", "Este endereço de email já está registado.");
+                    return Page();
+                }
+
+                // Verificar se o nome de utilizador já está em uso na tabela Utilizadores
+                var usernameExists = await _context.Utilizadores.AnyAsync(u => u.UserName == Input.Username);
+                if (usernameExists)
+                {
+                    ModelState.AddModelError("Input.Username", "Este nome de utilizador já está em uso.");
+                    return Page();
+                }
+
+                // Verificar se o utilizador já existe no Identity mas não está confirmado
+                var existingUser = await _userManager.FindByEmailAsync(Input.Email);
+                if (existingUser != null)
+                {
+                    if (!existingUser.EmailConfirmed)
+                    {
+                        var code = await _userManager.GenerateUserTokenAsync(existingUser, "Email", "ConfirmEmail");
+                        await _emailSender.SendEmailAsync(Input.Email, "Código de Validação - RPGForum",
+                            $"Olá {Input.Username},<br/><br/>O teu código de confirmação de conta no RPGForum é: <strong>{code}</strong>");
+
+                        return RedirectToPage("ConfirmCode", new { email = Input.Email, username = Input.Username, returnUrl = returnUrl });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Input.Email", "Este endereço de email já está registado.");
+                        return Page();
+                    }
+                }
+
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
@@ -128,32 +157,30 @@ namespace RPGForum.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
+                    // Gerar código numérico de 6 dígitos
+                    var code = await _userManager.GenerateUserTokenAsync(user, "Email", "ConfirmEmail");
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-                    
+                    // Enviar e-mail
+                    await _emailSender.SendEmailAsync(Input.Email, "Código de Validação - RPGForum",
+                        $"Olá {Input.Username},<br/><br/>O teu código de confirmação de conta no RPGForum é: <strong>{code}</strong>");
 
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
-                    }
-                    else
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
-                    }
+                    // Redirecionar para a página de introdução do código
+                    return RedirectToPage("ConfirmCode", new { email = Input.Email, username = Input.Username, returnUrl = returnUrl });
                 }
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    var description = error.Code switch
+                    {
+                        "PasswordRequiresNonAlphanumeric" => "A palavra-passe deve conter pelo menos um caráter especial (ex: !, @, #, etc.).",
+                        "PasswordRequiresDigit" => "A palavra-passe deve conter pelo menos um número ('0'-'9').",
+                        "PasswordRequiresLower" => "A palavra-passe deve conter pelo menos uma letra minúscula ('a'-'z').",
+                        "PasswordRequiresUpper" => "A palavra-passe deve conter pelo menos uma letra maiúscula ('A'-'Z').",
+                        "PasswordTooShort" => "A palavra-passe deve ter pelo menos 6 caracteres.",
+                        "DuplicateUserName" => "Este nome de utilizador ou email já está em uso.",
+                        "DuplicateEmail" => "Este endereço de email já está em uso.",
+                        _ => error.Description
+                    };
+                    ModelState.AddModelError(string.Empty, description);
                 }
             }
 

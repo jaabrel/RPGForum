@@ -14,7 +14,7 @@ namespace RPGForum.Data
         public DbSet<Estatisticas> Estatisticas { get; set; }
         public DbSet<Armas> Armas { get; set; }
         public DbSet<Acessorios> Acessorios { get; set; }
-        public DbSet<Comment> Comentario { get; set; }
+        public DbSet<Comment> Comentarios { get; set; }
         public DbSet<Like> Gostos { get; set; }
         public DbSet<BuildWeapon> BuildWeapons { get; set; }
         public DbSet<BuildAccessory> BuildAccessories { get; set; }
@@ -53,14 +53,18 @@ namespace RPGForum.Data
                 .HasOne(e => e.Build).WithOne(b => b.Stats).HasForeignKey<Estatisticas>(e => e.BuildId);
             
             builder.Entity<Comment>()
-                .HasOne(c => c.Parent).WithMany(c => c.Replies).HasForeignKey(c => c.ParentId).OnDelete(DeleteBehavior.Restrict);
-            
+                .HasOne(c => c.Parent)
+                .WithMany(c => c.Replies)
+                .HasForeignKey(c => c.ParentId)
+                .OnDelete(DeleteBehavior.Restrict);
             builder.Entity<Build>()
-                .HasMany(b => b.Comments).WithOne(c => c.Build).OnDelete(DeleteBehavior.Cascade);
-            
+                .HasMany(b => b.Comments)
+                .WithOne(c => c.Build)
+                .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<Build>()
-                .HasMany(b => b.Likes).WithOne(L => L.Build).OnDelete(DeleteBehavior.Cascade);
-            
+                .HasMany(b => b.Likes)
+                .WithOne(L => L.Build)
+                .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<Comment>()
                 .HasOne(c => c.User).WithMany(u => u.Comments).HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Restrict);
             

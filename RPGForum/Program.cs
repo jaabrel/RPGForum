@@ -4,12 +4,14 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
-using RPGForum.Services;
 using RPGForum.Models;
 using RPGForum.Hubs;
 using Microsoft.OpenApi;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Authorization;
+using RPGForum.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<Utilizadores>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddRazorPages();
 
 builder.Services.AddSwaggerGen(c =>
@@ -37,6 +40,28 @@ builder.Services.AddSwaggerGen(c =>
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
+});
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new AuthorizationPolicyBuilder(
+        JwtBearerDefaults.AuthenticationScheme,
+        IdentityConstants.ApplicationScheme)
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -69,21 +94,13 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler=ReferenceHandler.IgnoreCycles
         );
 
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromSeconds(60);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-builder.Services.AddDistributedMemoryCache();
+builder.Services.AddScoped<TokenService>();
 
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSignalR();
 
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-
-builder.Services.AddTransient<IEmailSender, GmailEmailSender>();
+builder.Services.AddTransient<IEmailSender, RPGForum.Services.SmtpEmailSender>();
 
 var app = builder.Build();
 
@@ -104,9 +121,12 @@ else
 app.UseStatusCodePagesWithRedirects("/Error/{0}");
 
 app.UseHttpsRedirection();
+
 app.UseRouting();
 
 app.UseSession();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
@@ -120,6 +140,14 @@ app.MapControllers();
 app.MapRazorPages()
    .WithStaticAssets();
 
+app.MapControllers();
+
 app.MapHub<CommentsHub>("/commentsHub");
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<RPGForum.Data.ApplicationDbContext>();
+    await RPGForum.Data.DbInitializer.SeedAsync(context);
+}
 
 app.Run();
