@@ -12,7 +12,7 @@
         </div>
         @if (User.Identity!.IsAuthenticated)
         {
-            <a asp-page="/Builds/Create" class="btn btn-primary shadow-sm px-4">
+            <a asp-page="/Build/Create" class="btn btn-primary shadow-sm px-4">
                 <i class="bi bi-plus-lg me-2"></i>Publicar Build
             </a>
         }
@@ -40,13 +40,8 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label fw-semibold text-secondary"><i class="bi bi-people me-1"></i>Autor</label>
-                        <select name="UtilizadorID" class="form-select form-select-lg border-0 shadow-sm">
-                            <option value="">Todos</option>
-                            @foreach (var u in Model.Utilizadores)
-                            {
-                                <option value="@u.Id" selected="@(Model.UtilizadorID == u.Id)">@u.UserName</option>
-                            }
-                        </select>
+                        <input type="text" name="UtilizadorNome" value="@Model.UtilizadorNome"
+                               class="form-control form-control-lg border-0 shadow-sm" placeholder="Nome do autor..." />
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold text-secondary"><i class="bi bi-sort-down me-1"></i>Ordenar</label>
@@ -75,7 +70,7 @@
             <p class="text-muted">Não encontrámos resultados para os teus filtros. Tenta pesquisar por outras palavras.</p>
             @if (User.Identity!.IsAuthenticated)
             {
-                <a asp-page="/Builds/Create" class="btn btn-outline-primary mt-3 px-4 rounded-pill">Sê o primeiro a publicar!</a>
+                <a asp-page="/Build/Create" class="btn btn-outline-primary mt-3 px-4 rounded-pill">Sê o primeiro a publicar!</a>
             }
         </div>
     }
@@ -103,7 +98,7 @@
                         <!-- Corpo do Card -->
                         <div class="card-body">
                             <h4 class="card-title fw-bold mb-3 line-clamp-2" style="height: 3rem;">
-                                <a asp-page="/Builds/Details" asp-route-id="@build.Id"
+                                <a asp-page="/Build/Details" asp-route-id="@build.Id"
                                    class="text-decoration-none text-dark stretched-link">
                                     @build.Title
                                 </a>

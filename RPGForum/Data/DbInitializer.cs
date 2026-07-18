@@ -7,6 +7,28 @@ namespace RPGForum.Data
     {
         public static async Task SeedAsync(ApplicationDbContext context)
         {
+            try
+            {
+                using (var cmd = context.Database.GetDbConnection().CreateCommand())
+                {
+                    await context.Database.OpenConnectionAsync();
+
+                    // 1. Rename initial migration from 20260714100833_DB1 to 20260717150801_InitialCreate
+                    cmd.CommandText = "UPDATE __EFMigrationsHistory SET MigrationId = '20260717150801_InitialCreate' WHERE MigrationId = '20260714100833_DB1';";
+                    await cmd.ExecuteNonQueryAsync();
+
+                    // 2. Rename stats migration from 20260718174412_AddEquipStats to 20260718190342_AddEquipStats
+                    cmd.CommandText = "UPDATE __EFMigrationsHistory SET MigrationId = '20260718190342_AddEquipStats' WHERE MigrationId = '20260718174412_AddEquipStats';";
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DB SYNC] Synchronization warning: {ex.Message}");
+            }
+
+
+
             await context.Database.MigrateAsync();
 
             var existing = await context.Personagens.ToListAsync();

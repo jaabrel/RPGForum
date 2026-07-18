@@ -32,10 +32,10 @@ namespace RPGForum.Pages.Build
         public Estatisticas Stats { get; set; } = new();
 
         [BindProperty]
-        public List<int> ArmasSelecionadas { get; set; } = new();
+        public string? ArmasNomes { get; set; }
 
         [BindProperty]
-        public List<int> AcessoriosSelecionados { get; set; } = new();
+        public string? AcessoriosNomes { get; set; }
 
         public SelectList PersonagensSelect { get; set; } = null!;
         public IList<Armas> TodasArmas { get; set; } = new List<Armas>();
@@ -81,23 +81,51 @@ namespace RPGForum.Pages.Build
             Build.BuidWeapons = new List<BuildWeapon>();
             Build.BuildAccessories = new List<BuildAccessory>();
 
-            // Associar armas selecionadas
-            foreach (var armaId in ArmasSelecionadas)
+            // Parse e associar armas
+            var armasNomesLista = string.IsNullOrWhiteSpace(ArmasNomes)
+                ? new List<string>()
+                : ArmasNomes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+            foreach (var nomeArma in armasNomesLista)
             {
-                Build.BuidWeapons.Add(new BuildWeapon
+                var arma = await _context.Armas.FirstOrDefaultAsync(a => a.Name.ToLower() == nomeArma.ToLower());
+                if (arma == null)
                 {
-                    WeaponId = armaId
-                });
+                    ModelState.AddModelError("ArmasNomes", $"A arma '{nomeArma}' não existe no sistema.");
+                }
+                else
+                {
+                    Build.BuidWeapons.Add(new BuildWeapon { WeaponId = arma.Id });
+                }
             }
 
-            // Associar acessórios selecionados
-            for (int i = 0; i < AcessoriosSelecionados.Count; i++)
+            // Parse e associar acessórios
+            var acessoriosNomesLista = string.IsNullOrWhiteSpace(AcessoriosNomes)
+                ? new List<string>()
+                : AcessoriosNomes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+            for (int i = 0; i < acessoriosNomesLista.Count; i++)
             {
-                Build.BuildAccessories.Add(new BuildAccessory
+                var nomeAcessorio = acessoriosNomesLista[i];
+                var acessorio = await _context.Acessorios.FirstOrDefaultAsync(a => a.Name.ToLower() == nomeAcessorio.ToLower());
+                if (acessorio == null)
                 {
-                    AccessoryId = AcessoriosSelecionados[i],
-                    SlotPosition = i + 1
-                });
+                    ModelState.AddModelError("AcessoriosNomes", $"O acessório '{nomeAcessorio}' não existe no sistema.");
+                }
+                else
+                {
+                    Build.BuildAccessories.Add(new BuildAccessory
+                    {
+                        AccessoryId = acessorio.Id,
+                        SlotPosition = i + 1
+                    });
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await CarregarListasAsync();
+                return Page();
             }
 
             try
