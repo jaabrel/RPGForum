@@ -59,7 +59,7 @@
                             @for (int i = 0; i < Math.Min(stats.Length, bonuses.Length); i++)
                             {
                                 <li>
-                                    <span class="badge bg-success me-2">@((int.Parse(bonuses[i]) > 0 ? "+" : ""))@bonuses[i]</span>
+                                    <span class="badge @(int.Parse(bonuses[i]) > 0 ? "bg-success" : "bg-danger") me-2">@((int.Parse(bonuses[i]) > 0 ? "+" : ""))@bonuses[i]</span>
                                     <strong>@stats[i]</strong>
                                 </li>
                             }

@@ -87,62 +87,60 @@
             </div>
 
             <!-- Armas -->
-            @if (Model.TodasArmas.Any())
-            {
-                <div class="card mb-4">
-                    <div class="card-header fw-semibold">Armas</div>
-                    <div class="card-body">
-                        <div class="row row-cols-2 row-cols-md-3 g-2">
-                            @foreach (var arma in Model.TodasArmas)
-                            {
-                                <div class="col">
-                                    <div class="form-check">
-                                        <input type="checkbox" name="ArmasSelecionadas" value="@arma.Id"
-                                               class="form-check-input" id="arma_@arma.Id"
-                                        @(Model.ArmasSelecionadas.Contains(arma.Id) ? "checked" : "") />
-                                        <label class="form-check-label" for="arma_@arma.Id">
-                                            @arma.Name
-                                            @if (!string.IsNullOrEmpty(arma.Type))
-                                            {
-                                                <small class="text-muted"> (@arma.Type)</small>
-                                            }
-                                        </label>
-                                    </div>
-                                </div>
-                            }
-                        </div>
+            <div class="card mb-4 border-0 shadow-sm rounded-4">
+                <div class="card-header bg-dark text-white fw-semibold py-3">Armas da Build</div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label asp-for="ArmasNomes" class="form-label fw-bold"><i class="bi bi-shield-fill me-1"></i>Armas associadas <span class="text-muted small">(separadas por vírgula)</span></label>
+                        <input asp-for="ArmasNomes" id="ArmasNomes" class="form-control form-control-lg border-2 shadow-none rounded-3" placeholder="Ex: Espada Longa, Cajado Arcano..." />
+                        <span asp-validation-for="ArmasNomes" class="text-danger small"></span>
                     </div>
+                    @if (Model.TodasArmas.Any())
+                    {
+                        <div class="mt-3">
+                            <span class="text-secondary small d-block mb-2 fw-semibold">Sugestões de Armas (clica para adicionar):</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var arma in Model.TodasArmas)
+                                {
+                                    <span class="badge bg-light text-dark border py-2 px-3 rounded-pill cursor-pointer hover-shadow transition-all" 
+                                          style="cursor: pointer;"
+                                          onclick="var el = document.getElementById('ArmasNomes'); var cur = el.value.trim(); el.value = cur ? cur + ', ' + '@arma.Name' : '@arma.Name';">
+                                        @arma.Name <small class="text-muted">(@arma.Type)</small>
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
-            }
+            </div>
 
             <!-- Acessórios -->
-            @if (Model.TodosAcessorios.Any())
-            {
-                <div class="card mb-4">
-                    <div class="card-header fw-semibold">Acessórios</div>
-                    <div class="card-body">
-                        <div class="row row-cols-2 row-cols-md-3 g-2">
-                            @foreach (var acessorio in Model.TodosAcessorios)
-                            {
-                                <div class="col">
-                                    <div class="form-check">
-                                        <input type="checkbox" name="AcessoriosSelecionados" value="@acessorio.Id"
-                                               class="form-check-input" id="acess_@acessorio.Id"
-                                        @(Model.AcessoriosSelecionados.Contains(acessorio.Id) ? "checked" : "") />
-                                        <label class="form-check-label" for="acess_@acessorio.Id">
-                                            @acessorio.Name
-                                            @if (!string.IsNullOrEmpty(acessorio.Type))
-                                            {
-                                                <small class="text-muted"> (@acessorio.Type)</small>
-                                            }
-                                        </label>
-                                    </div>
-                                </div>
-                            }
-                        </div>
+            <div class="card mb-4 border-0 shadow-sm rounded-4">
+                <div class="card-header bg-dark text-white fw-semibold py-3">Acessórios da Build</div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label asp-for="AcessoriosNomes" class="form-label fw-bold"><i class="bi bi-gem me-1"></i>Acessórios associados <span class="text-muted small">(separados por vírgula)</span></label>
+                        <input asp-for="AcessoriosNomes" id="AcessoriosNomes" class="form-control form-control-lg border-2 shadow-none rounded-3" placeholder="Ex: Anel da Força, Colar da Vida..." />
+                        <span asp-validation-for="AcessoriosNomes" class="text-danger small"></span>
                     </div>
+                    @if (Model.TodosAcessorios.Any())
+                    {
+                        <div class="mt-3">
+                            <span class="text-secondary small d-block mb-2 fw-semibold">Sugestões de Acessórios (clica para adicionar):</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var acessorio in Model.TodosAcessorios)
+                                {
+                                    <span class="badge bg-light text-dark border py-2 px-3 rounded-pill cursor-pointer hover-shadow transition-all" 
+                                          style="cursor: pointer;"
+                                          onclick="var el = document.getElementById('AcessoriosNomes'); var cur = el.value.trim(); el.value = cur ? cur + ', ' + '@acessorio.Name' : '@acessorio.Name';">
+                                        @acessorio.Name <small class="text-muted">(@acessorio.Type)</small>
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
-            }
+            </div>
 
             <div class="d-flex gap-2 justify-content-end">
                 <a asp-page="Index" class="btn btn-outline-secondary">Cancelar</a>

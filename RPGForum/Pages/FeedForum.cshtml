@@ -146,7 +146,7 @@
                            asp-route-Pagina="@(Model.PaginaAtual - 1)" 
                            asp-route-Pesquisa="@Model.Pesquisa"
                            asp-route-PersonagemId="@Model.PersonagemId"
-                           asp-route-UtilizadorID="@Model.UtilizadorID"
+                           asp-route-UtilizadorNome="@Model.UtilizadorNome"
                            asp-route-Ordenar="@Model.Ordenar" aria-label="Anterior">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
@@ -158,7 +158,7 @@
                                asp-route-Pagina="@i"
                                asp-route-Pesquisa="@Model.Pesquisa"
                                asp-route-PersonagemId="@Model.PersonagemId"
-                               asp-route-UtilizadorID="@Model.UtilizadorID"
+                               asp-route-UtilizadorNome="@Model.UtilizadorNome"
                                asp-route-Ordenar="@Model.Ordenar">@i</a>
                         </li>
                     }
@@ -167,7 +167,7 @@
                            asp-route-Pagina="@(Model.PaginaAtual + 1)"
                            asp-route-Pesquisa="@Model.Pesquisa"
                            asp-route-PersonagemId="@Model.PersonagemId"
-                           asp-route-UtilizadorID="@Model.UtilizadorID"
+                           asp-route-UtilizadorNome="@Model.UtilizadorNome"
                            asp-route-Ordenar="@Model.Ordenar" aria-label="Seguinte">
                             <span aria-hidden="true">&raquo;</span>
                         </a>

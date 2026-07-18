@@ -383,10 +383,13 @@
                                         {
                                             var statsList = bw.Weapon.StatAfetada.Split(',');
                                             var bonusList = bw.Weapon.StatBonus.Split(',');
-                                            <div class="text-success small ps-2">
+                                            <div class="small ps-2">
                                                 @for (int i = 0; i < Math.Min(statsList.Length, bonusList.Length); i++)
                                                 {
-                                                    <span>+@bonusList[i] @statsList[i]</span>@(i < Math.Min(statsList.Length, bonusList.Length) - 1 ? ", " : "")
+                                                    var bonusValStr = bonusList[i];
+                                                    var isNegative = bonusValStr.StartsWith("-");
+                                                    var formattedBonus = isNegative ? bonusValStr : "+" + bonusValStr;
+                                                    <span class="@(isNegative ? "text-danger" : "text-success")">@formattedBonus @statsList[i]</span>@(i < Math.Min(statsList.Length, bonusList.Length) - 1 ? ", " : "")
                                                 }
                                             </div>
                                         }
@@ -411,10 +414,13 @@
                                         {
                                             var statsList = ba.Accessory.StatAfetada.Split(',');
                                             var bonusList = ba.Accessory.StatBonus.Split(',');
-                                            <div class="text-success small ps-2">
+                                            <div class="small ps-2">
                                                 @for (int i = 0; i < Math.Min(statsList.Length, bonusList.Length); i++)
                                                 {
-                                                    <span>+@bonusList[i] @statsList[i]</span>@(i < Math.Min(statsList.Length, bonusList.Length) - 1 ? ", " : "")
+                                                    var bonusValStr = bonusList[i];
+                                                    var isNegative = bonusValStr.StartsWith("-");
+                                                    var formattedBonus = isNegative ? bonusValStr : "+" + bonusValStr;
+                                                    <span class="@(isNegative ? "text-danger" : "text-success")">@formattedBonus @statsList[i]</span>@(i < Math.Min(statsList.Length, bonusList.Length) - 1 ? ", " : "")
                                                 }
                                             </div>
                                         }

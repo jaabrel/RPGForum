@@ -32,10 +32,10 @@ namespace RPGForum.Pages.Build
         public Estatisticas Stats { get; set; } = null!;
 
         [BindProperty]
-        public List<int> ArmasSelecionadas { get; set; } = new();
+        public string? ArmasNomes { get; set; }
 
         [BindProperty]
-        public List<int> AcessoriosSelecionados { get; set; } = new();
+        public string? AcessoriosNomes { get; set; }
 
         public SelectList PersonagensSelect { get; set; } = null!;
         public IList<Armas> TodasArmas { get; set; } = new List<Armas>();
@@ -48,8 +48,8 @@ namespace RPGForum.Pages.Build
 
             var build = await _context.Builds
                 .Include(b => b.Stats)
-                .Include(b => b.BuidWeapons)
-                .Include(b => b.BuildAccessories)
+                .Include(b => b.BuidWeapons).ThenInclude(bw => bw.Weapon)
+                .Include(b => b.BuildAccessories).ThenInclude(ba => ba.Accessory)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (build == null) return NotFound();
@@ -61,11 +61,8 @@ namespace RPGForum.Pages.Build
             Build = build;
             Stats = build.Stats ?? new Estatisticas { BuildId = id };
 
-            ArmasSelecionadas = build.BuidWeapons.Select(bw => bw.WeaponId).ToList();
-            AcessoriosSelecionados = build.BuildAccessories
-                .OrderBy(ba => ba.SlotPosition)
-                .Select(ba => ba.AccessoryId)
-                .ToList();
+            ArmasNomes = string.Join(", ", build.BuidWeapons.Select(bw => bw.Weapon?.Name).Where(name => name != null));
+            AcessoriosNomes = string.Join(", ", build.BuildAccessories.OrderBy(ba => ba.SlotPosition).Select(ba => ba.Accessory?.Name).Where(name => name != null));
 
             await CarregarListasAsync();
             return Page();
@@ -121,27 +118,69 @@ namespace RPGForum.Pages.Build
                 buildExistente.Stats.Speed = Stats.Speed;
             }
 
+            // Parse e associar armas
+            var armasNomesLista = string.IsNullOrWhiteSpace(ArmasNomes)
+                ? new List<string>()
+                : ArmasNomes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+            var armasParaAdicionar = new List<BuildWeapon>();
+            foreach (var nomeArma in armasNomesLista)
+            {
+                var arma = await _context.Armas.FirstOrDefaultAsync(a => a.Name.ToLower() == nomeArma.ToLower());
+                if (arma == null)
+                {
+                    ModelState.AddModelError("ArmasNomes", $"A arma '{nomeArma}' não existe no sistema.");
+                }
+                else
+                {
+                    armasParaAdicionar.Add(new BuildWeapon { BuildId = id, WeaponId = arma.Id });
+                }
+            }
+
+            // Parse e associar acessórios
+            var acessoriosNomesLista = string.IsNullOrWhiteSpace(AcessoriosNomes)
+                ? new List<string>()
+                : AcessoriosNomes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+            var acessoriosParaAdicionar = new List<BuildAccessory>();
+            for (int i = 0; i < acessoriosNomesLista.Count; i++)
+            {
+                var nomeAcessorio = acessoriosNomesLista[i];
+                var acessorio = await _context.Acessorios.FirstOrDefaultAsync(a => a.Name.ToLower() == nomeAcessorio.ToLower());
+                if (acessorio == null)
+                {
+                    ModelState.AddModelError("AcessoriosNomes", $"O acessório '{nomeAcessorio}' não existe no sistema.");
+                }
+                else
+                {
+                    acessoriosParaAdicionar.Add(new BuildAccessory
+                    {
+                        BuildId = id,
+                        AccessoryId = acessorio.Id,
+                        SlotPosition = i + 1
+                    });
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await CarregarListasAsync();
+                Build = buildExistente;
+                return Page();
+            }
+
             // Atualizar armas: remover antigas e adicionar novas
             _context.BuildWeapons.RemoveRange(buildExistente.BuidWeapons);
-            foreach (var armaId in ArmasSelecionadas)
+            foreach (var bw in armasParaAdicionar)
             {
-                _context.BuildWeapons.Add(new BuildWeapon
-                {
-                    BuildId = id,
-                    WeaponId = armaId
-                });
+                _context.BuildWeapons.Add(bw);
             }
 
             // Atualizar acessórios
             _context.BuildAccessories.RemoveRange(buildExistente.BuildAccessories);
-            for (int i = 0; i < AcessoriosSelecionados.Count; i++)
+            foreach (var ba in acessoriosParaAdicionar)
             {
-                _context.BuildAccessories.Add(new BuildAccessory
-                {
-                    BuildId = id,
-                    AccessoryId = AcessoriosSelecionados[i],
-                    SlotPosition = i + 1
-                });
+                _context.BuildAccessories.Add(ba);
             }
 
             await _context.SaveChangesAsync();
