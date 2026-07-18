@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using RPGForum.Models;
 
@@ -110,6 +111,41 @@ namespace RPGForum.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+                // Verificar se o email já está em uso na tabela Utilizadores
+                var emailExists = await _context.Utilizadores.AnyAsync(u => u.Email == Input.Email);
+                if (emailExists)
+                {
+                    ModelState.AddModelError("Input.Email", "Este endereço de email já está registado.");
+                    return Page();
+                }
+
+                // Verificar se o nome de utilizador já está em uso na tabela Utilizadores
+                var usernameExists = await _context.Utilizadores.AnyAsync(u => u.Username == Input.Username);
+                if (usernameExists)
+                {
+                    ModelState.AddModelError("Input.Username", "Este nome de utilizador já está em uso.");
+                    return Page();
+                }
+
+                // Verificar se o utilizador já existe no Identity mas não está confirmado
+                var existingUser = await _userManager.FindByEmailAsync(Input.Email);
+                if (existingUser != null)
+                {
+                    if (!existingUser.EmailConfirmed)
+                    {
+                        var code = await _userManager.GenerateUserTokenAsync(existingUser, "Email", "ConfirmEmail");
+                        await _emailSender.SendEmailAsync(Input.Email, "Código de Validação - RPGForum",
+                            $"Olá {Input.Username},<br/><br/>O teu código de confirmação de conta no RPGForum é: <strong>{code}</strong>");
+
+                        return RedirectToPage("ConfirmCode", new { email = Input.Email, username = Input.Username, returnUrl = returnUrl });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Input.Email", "Este endereço de email já está registado.");
+                        return Page();
+                    }
+                }
+
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
@@ -120,40 +156,15 @@ namespace RPGForum.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    var utilizador = new Utilizadores
-                    {
-                        Username = Input.Username,
-                        Email = Input.Email,
-                        Password = "",
-                        Role = "Registered",
-                        CreatedAt = DateTime.UtcNow,
-                        IdentityUserName = Input.Email
-                    };
+                    // Gerar código numérico de 6 dígitos
+                    var code = await _userManager.GenerateUserTokenAsync(user, "Email", "ConfirmEmail");
 
-                    _context.Utilizadores.Add(utilizador);
-                    await _context.SaveChangesAsync();
+                    // Enviar e-mail
+                    await _emailSender.SendEmailAsync(Input.Email, "Código de Validação - RPGForum",
+                        $"Olá {Input.Username},<br/><br/>O teu código de confirmação de conta no RPGForum é: <strong>{code}</strong>");
 
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        var userId = await _userManager.GetUserIdAsync(user);
-                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                        var callbackUrl = Url.Page(
-                            "/Account/ConfirmEmail",
-                            pageHandler: null,
-                            values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                            protocol: Request.Scheme);
-
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
-                    }
-                    else
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
-                    }
+                    // Redirecionar para a página de introdução do código
+                    return RedirectToPage("ConfirmCode", new { email = Input.Email, username = Input.Username, returnUrl = returnUrl });
                 }
                 foreach (var error in result.Errors)
                 {

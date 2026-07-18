@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
 using System.Threading.Tasks;
 
-namespace RPGForum.Pages.Admin.Acessorios
+namespace RPGForum.Pages.Admin.Personagens
 {
     [Authorize(Roles = "Administrator")]
     public class DetailsModel : PageModel
@@ -17,7 +17,7 @@ namespace RPGForum.Pages.Admin.Acessorios
             _context = context;
         }
 
-        public Models.Acessorios Acessorio { get; set; } = default!;
+        public Models.Personagens Personagem { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -26,14 +26,14 @@ namespace RPGForum.Pages.Admin.Acessorios
                 return NotFound();
             }
 
-            var acessorio = await _context.Acessorios.FirstOrDefaultAsync(m => m.Id == id);
-            if (acessorio == null)
+            var personagem = await _context.Personagens.FirstOrDefaultAsync(m => m.Id == id);
+            if (personagem == null)
             {
                 return NotFound();
             }
             else
             {
-                Acessorio = acessorio;
+                Personagem = personagem;
             }
             return Page();
         }
