@@ -12,9 +12,9 @@ namespace RPGForum.Pages.Admin.Utilizadores
     public class DeleteModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Models.Utilizadores> _userManager;
 
-        public DeleteModel(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public DeleteModel(ApplicationDbContext context, UserManager<Models.Utilizadores> userManager)
         {
             _context = context;
             _userManager = userManager;
