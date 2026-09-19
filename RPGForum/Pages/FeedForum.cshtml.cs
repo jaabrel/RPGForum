@@ -16,7 +16,7 @@ namespace RPGForum.Pages
         }
 
         public IList<Models.Build> Builds { get; set; } = new List<Models.Build>();
-        public IList<Personagens> Personagens { get; set; } = new List<Personagens>();
+        public IList<Models.Personagens> Personagens { get; set; } = new List<Models.Personagens>();
         [BindProperty(SupportsGet = true)]
         public string? Pesquisa { get; set; }
 

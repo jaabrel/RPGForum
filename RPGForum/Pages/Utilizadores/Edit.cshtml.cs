@@ -89,6 +89,19 @@ namespace RPGForum.Pages.Utilizadores
                 return NotFound();
             }
 
+            var utilizadorAtual = await _userManager.GetUserAsync(User);
+            if (utilizadorAtual == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+
+            if (utilizador.Id != utilizadorAtual.Id && !User.IsInRole("Administrator"))
+            {
+                return Forbid();
+            }
+
+            if (!User.IsInRole("Administrator"))
+            {
+                Input.Role = utilizador.Role;
+            }
+
             // Validar e-mail duplicado
             var emailExists = await _context.Utilizadores.AnyAsync(u => u.Email == Input.Email && u.Id != Input.Id);
             if (emailExists)

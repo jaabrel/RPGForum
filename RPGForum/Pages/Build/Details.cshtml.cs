@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using RPGForum.Data;
+using RPGForum.Hubs;
 using RPGForum.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
@@ -13,11 +15,13 @@ namespace RPGForum.Pages.Build
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Models.Utilizadores> _userManager;
+        private readonly IHubContext<CommentsHub> _hubContext;
 
-        public DetailsModel(ApplicationDbContext context, UserManager<Models.Utilizadores> userManager)
+        public DetailsModel(ApplicationDbContext context, UserManager<Models.Utilizadores> userManager, IHubContext<CommentsHub> hubContext)
         {
             _context = context;
             _userManager = userManager;
+            _hubContext = hubContext;
         }
 
         // --- Dados da página ---
@@ -121,6 +125,14 @@ namespace RPGForum.Pages.Build
 
             _context.Comentarios.Add(comentario);
             await _context.SaveChangesAsync();
+
+            await _hubContext.Clients.Group($"build-{id}").SendAsync("ReceiveComment", new
+            {
+                userName = utilizador.UserName,
+                commentText = comentario.Content,
+                timestamp = comentario.CreatedAt,
+                parentId = comentario.ParentId
+            });
 
             // Redirecionar de volta à página com âncora para os comentários
             return RedirectToPage(pageName: null, pageHandler: null, new { id }, fragment: "comentarios");

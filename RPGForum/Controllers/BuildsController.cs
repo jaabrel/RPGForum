@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using RPGForum.Models;
 using RPGForum.Data;
 using System.ComponentModel.DataAnnotations;
-using RPGForum.Models.DTOs;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -46,7 +45,7 @@ public class BuildsController : ControllerBase
             .Include(b => b.CharClass)
             .Include(b => b.User)
             .Include(b => b.BuidWeapons).ThenInclude(bw => bw.Weapon)
-            .Include(b => b.BuidAccessories).ThenInclude(ba => ba.Accessory)
+            .Include(b => b.BuildAccessories).ThenInclude(ba => ba.Accessory)
             .FirstOrDefaultAsync(b => b.Id == id);
 
         if (build == null)

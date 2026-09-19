@@ -38,8 +38,8 @@ namespace RPGForum.Pages.Build
         public string? AcessoriosNomes { get; set; }
 
         public SelectList PersonagensSelect { get; set; } = null!;
-        public IList<Armas> TodasArmas { get; set; } = new List<Armas>();
-        public IList<Acessorios> TodosAcessorios { get; set; } = new List<Acessorios>();
+        public IList<Models.Armas> TodasArmas { get; set; } = new List<Models.Armas>();
+        public IList<Models.Acessorios> TodosAcessorios { get; set; } = new List<Models.Acessorios>();
 
         public async Task<IActionResult> OnGetAsync()
         {

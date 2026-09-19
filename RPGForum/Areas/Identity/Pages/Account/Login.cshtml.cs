@@ -23,12 +23,14 @@ namespace RPGForum.Areas.Identity.Pages.Account
         private readonly SignInManager<Utilizadores> _signInManager;
         private readonly UserManager<Utilizadores> _userManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly IEmailSender _emailSender;
 
-        public LoginModel(SignInManager<Utilizadores> signInManager, UserManager<Utilizadores> userManager,ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<Utilizadores> signInManager, UserManager<Utilizadores> userManager,ILogger<LoginModel> logger, IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
+            _emailSender = emailSender;
         }
 
         /// <summary>

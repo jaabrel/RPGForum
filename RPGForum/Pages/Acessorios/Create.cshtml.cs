@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using RPGForum.Models;
 using RPGForum.Data;
 
-namespace RPGForum.Page.Acessorios;
+namespace RPGForum.Pages.Acessorios;
 
     [Authorize(Roles = "Administrator")]
     public class CreateModel : PageModel
