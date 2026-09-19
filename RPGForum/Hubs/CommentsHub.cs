@@ -54,5 +54,15 @@ namespace RPGForum.Hubs
         {
             await base.OnDisconnectedAsync(exception);
         }
+
+        public async Task SendNotification(string utilizadorDestino, string mensagem)
+        {
+            await Clients.User(utilizadorDestino).SendAsync("ReceiveNotification", mensagem);
+        }
+
+        public async Task EnviarNotificacaoGeral(string mensagem)
+        {
+            await Clients.All.SendAsync("ReceiveNotification", mensagem);
+        }
     }
 }

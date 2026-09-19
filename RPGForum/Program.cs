@@ -45,11 +45,14 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
-    // Nova sintaxe (Swashbuckle v10 / Microsoft.OpenApi v2)
     c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
         [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
     });
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
 });
 
 builder.Services.AddControllers()
@@ -138,14 +141,11 @@ app.UseSession();
 
 app.UseAuthentication();
 
+app.UseSwagger();
+
 app.UseAuthorization();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-
 app.MapStaticAssets();
-
-app.MapControllers();
 
 app.MapRazorPages()
    .WithStaticAssets();

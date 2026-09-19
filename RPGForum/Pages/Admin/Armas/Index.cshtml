@@ -23,7 +23,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table id"tabelaAdmin" class="table table-hover align-middle mb-0">
                      <thead class="table-dark">
                         <tr>
                             <th scope="col" style="width: 30%;">Nome</th>
@@ -75,3 +75,18 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#tabelaAdmin').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-PT.json' }
+            });
+        });
+    </script>
+}

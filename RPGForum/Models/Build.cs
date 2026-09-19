@@ -39,6 +39,11 @@ namespace RPGForum.Models
         [Range(1, 100)]
         public int Level { get; set; } = 1;
 
+        /// <summary>
+        /// Indica se a build foi eliminada (soft delete)
+        /// </summary>
+        public bool IsDeleted { get; set; } = false;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

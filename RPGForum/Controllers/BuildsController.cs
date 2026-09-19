@@ -162,7 +162,7 @@ public class BuildsController : ControllerBase
 
         var isAdmin = User.IsInRole("Administrator");
 
-        if (build.UtilizadorID != utilizador.Id || isAdmin) 
+        if (build.UtilizadorID != utilizador.Id && !isAdmin) 
         {
             return Forbid();
         }

@@ -153,4 +153,12 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js"></script>
+    <script>
+        tinymce.init({
+            selector: '#Build_Description', // O ID do campo textarea gerado pelo Razor
+            plugins: 'lists link',
+            toolbar: 'undo redo | bold italic | bullist numlist'
+        });
+    </script>
 }

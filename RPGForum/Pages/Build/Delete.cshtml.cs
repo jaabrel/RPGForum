@@ -57,7 +57,8 @@ namespace RPGForum.Pages.Build
             if (build.UtilizadorID != utilizador.Id && !User.IsInRole("Administrator"))
                 return Forbid();
 
-            _context.Builds.Remove(build);
+            build.IsDeleted = true;
+            _context.Builds.Update(build);
             await _context.SaveChangesAsync();
 
             TempData["Sucesso"] = $"Build \"{build.Title}\" eliminada com sucesso!";

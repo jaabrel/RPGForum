@@ -49,7 +49,7 @@
         {
             <div class="card mb-4">
                 <div class="card-body">
-                    <p class="mb-0" style="white-space: pre-line">@build.Description</p>
+                    <p class="mb-0" style="white-space: pre-line">@Html.Raw(build.Description)</p>
                 </div>
             </div>
         }
@@ -601,4 +601,7 @@
             border-radius: 6px;
         }
     </style>
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
