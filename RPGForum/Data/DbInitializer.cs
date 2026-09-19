@@ -3,102 +3,142 @@ using RPGForum.Models;
 
 namespace RPGForum.Data
 {
-    
+
     public static class DbInitializer
     {
         public static async Task SeedAsync(ApplicationDbContext context)
         {
-            try
-            {
-                using (var cmd = context.Database.GetDbConnection().CreateCommand())
-                {
-                    await context.Database.OpenConnectionAsync();
-
-                    // 1. Rename initial migration from 20260714100833_DB1 to 20260717150801_InitialCreate
-                    cmd.CommandText = "UPDATE __EFMigrationsHistory SET MigrationId = '20260717150801_InitialCreate' WHERE MigrationId = '20260714100833_DB1';";
-                    await cmd.ExecuteNonQueryAsync();
-
-                    // 2. Rename stats migration from 20260718174412_AddEquipStats to 20260718190342_AddEquipStats
-                    cmd.CommandText = "UPDATE __EFMigrationsHistory SET MigrationId = '20260718190342_AddEquipStats' WHERE MigrationId = '20260718174412_AddEquipStats';";
-                    await cmd.ExecuteNonQueryAsync();
-
-                    // 3. Set journal mode to DELETE permanently
-                    cmd.CommandText = "PRAGMA journal_mode=DELETE;";
-                    await cmd.ExecuteNonQueryAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[DB SYNC] Synchronization warning: {ex.Message}");
-            }
-
-
-
+            // Garante que a base de dados existe e as migrações estão aplicadas
             await context.Database.MigrateAsync();
-
-            var existing = await context.Personagens.ToListAsync();
-
-            var targetCharacters = new List<Personagens>
+            // 1. POPULAR PERSONAGENS (se a tabela estiver vazia)
+            if (!await context.Personagens.AnyAsync())
             {
-                new() 
-                { 
-                    Name = "Ichigo Kurosaki", 
-                    Description = "Um Shinigami substituto de Karakura, portador da icónica Zanpakutou Zangetsu e mestre do Getsuga Tenshou.", 
-                    ImageUrl = "/images/ichigo.png" 
-                },
-                new() 
-                { 
-                    Name = "Goku", 
-                    Description = "Um lendário guerreiro Saiyajin criado na Terra, mestre de artes marciais, famoso pelo seu Kamehameha e pela busca constante de superar os seus limites.", 
-                    ImageUrl = "/images/goku.png" 
-                },
-                new() 
-                { 
-                    Name = "Sonic the Hedgehog", 
-                    Description = "O ouriço azul mais rápido do mundo, defensor da liberdade que usa a sua velocidade supersónica e spin dash para derrotar o Dr. Eggman.", 
-                    ImageUrl = "/images/sonic.png" 
-                }
-            };
-
-            // Se existirem registos, vamos atualizar os seus nomes e descrições para manter os IDs consistentes com builds existentes
-            if (existing.Count > 0)
+                var personagens = new List<Personagens>
+                {
+                    new()
+                    {
+                        Name = "Ichigo Kurosaki",
+                        Description = "Shinigami substituto de Karakura, portador da Zanpakutou Zangetsu e mestre do Getsuga Tenshou.",
+                        
+                    },
+                    new()
+                    {
+                        Name = "Goku",
+                        Description = "Guerreiro Saiyajin criado na Terra, mestre em artes marciais e mestre do icónico Kamehameha.",
+                        
+                    },
+                    new()
+                    {
+                        Name = "Sonic the Hedgehog",
+                        Description = "O ouriço azul mais rápido do mundo, defensor da liberdade através da sua velocidade supersónica.",
+                        
+                    }
+                };
+                await context.Personagens.AddRangeAsync(personagens);
+                await context.SaveChangesAsync();
+            }
+            // 2. POPULAR ARMAS (se a tabela estiver vazia)
+            if (!await context.Armas.AnyAsync())
             {
-                for (int i = 0; i < Math.Min(existing.Count, targetCharacters.Count); i++)
+                var armas = new List<Armas>
                 {
-                    existing[i].Name = targetCharacters[i].Name;
-                    existing[i].Description = targetCharacters[i].Description;
-                    existing[i].ImageUrl = targetCharacters[i].ImageUrl;
-                }
-                
-                if (existing.Count < targetCharacters.Count)
+                    new() { Name = "Zangetsu (Bankai)", Type = "Espada", Description = "Lâmina escura de shinigami que amplia o poder espiritual.", StatAfetada = "Força", StatBonus = "+45 Força" },
+                    new() { Name = "Báculo Mágico (Nyoibo)", Type = "Cajado", Description = "Bastão que estica até ao infinito conforme a vontade do lutador.", StatAfetada = "Defesa", StatBonus = "+30 Defesa" },
+                    new() { Name = "Luvas Supersónicas", Type = "Manoplas", Description = "Manoplas que canalizam o atrito do vento em golpes explosivos.", StatAfetada = "Velocidade", StatBonus = "+50 Velocidade" },
+                    new() { Name = "Arco de Energia Espiritual", Type = "Arco", Description = "Dispara setas criadas a partir do poder mágico puro.", StatAfetada = "Magia", StatBonus = "+40 Magia" }
+                };
+                await context.Armas.AddRangeAsync(armas);
+                await context.SaveChangesAsync();
+            }
+            // 3. POPULAR ACESSÓRIOS (se a tabela estiver vazia)
+            if (!await context.Acessorios.AnyAsync())
+            {
+                var acessorios = new List<Acessorios>
                 {
-                    for (int i = existing.Count; i < targetCharacters.Count; i++)
-                    {
-                        context.Personagens.Add(targetCharacters[i]);
-                    }
-                }
-                else if (existing.Count > targetCharacters.Count)
+                    new() { Name = "Brinco Potara", Type = "Brinco", Description = "Jóia mágica que funde e multiplica exponencialmente o poder interior.", StatAfetada = "Força", StatBonus = "+25 Todos os Atributos" },
+                    new() { Name = "Botas de Alta Fricção", Type = "Calçado", Description = "Calçado resistente concebido para corridas a velocidade da luz.", StatAfetada = "Velocidade", StatBonus = "+35 Velocidade" },
+                    new() { Name = "Máscara Hollow", Type = "Máscara", Description = "Concede um aumento monstruoso de poder espiritual e regeneração.", StatAfetada = "HP", StatBonus = "+500 HP" },
+                    new() { Name = "Amuleto do Dragão", Type = "Colar", Description = "Amuleto lendário que protege o portador contra golpes letais.", StatAfetada = "Defesa", StatBonus = "+30 Defesa" }
+                };
+                await context.Acessorios.AddRangeAsync(acessorios);
+                await context.SaveChangesAsync();
+            }
+            // 4. POPULAR BUILDS DE EXEMPLO (se o fórum estiver vazio)
+            if (!await context.Builds.AnyAsync())
+            {
+                var goku = await context.Personagens.FirstOrDefaultAsync(p => p.Name.Contains("Goku"));
+                var ichigo = await context.Personagens.FirstOrDefaultAsync(p => p.Name.Contains("Ichigo"));
+                var adminUser = await context.Utilizadores.FirstOrDefaultAsync(u => u.Id == "admin");
+                var espada = await context.Armas.FirstOrDefaultAsync(a => a.Name.Contains("Zangetsu"));
+                var luvas = await context.Armas.FirstOrDefaultAsync(a => a.Name.Contains("Luvas"));
+                var mascara = await context.Acessorios.FirstOrDefaultAsync(a => a.Name.Contains("Máscara"));
+                var brinco = await context.Acessorios.FirstOrDefaultAsync(a => a.Name.Contains("Potara"));
+                if (goku != null && ichigo != null && adminUser != null)
                 {
-                    var idsToRemove = existing.Skip(targetCharacters.Count).Select(e => e.Id).ToList();
-                    var buildsToUpdate = await context.Builds.Where(b => idsToRemove.Contains(b.CharacterId)).ToListAsync();
-                    foreach (var build in buildsToUpdate)
+                    // Build 1: Goku Super Saiyajin
+                    var buildGoku = new Build
                     {
-                        build.CharacterId = existing[0].Id;
-                    }
-
-                    for (int i = targetCharacters.Count; i < existing.Count; i++)
+                        Title = "Goku Super Saiyajin - Burst Físico",
+                        Description = "<p>Esta build foca-se em <strong>destruição rápida</strong> com golpes corpo a corpo de alta intensidade e finalização com Kamehameha. Ideal para PvE agressivo!</p>",
+                        Level = 85,
+                        CharacterId = goku.Id,
+                        UtilizadorID = adminUser.Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-2),
+                        UpdatedAt = DateTime.UtcNow.AddDays(-2),
+                        Stats = new Estatisticas
+                        {
+                            Hp = 1200,
+                            Strength = 95,
+                            Defense = 80,
+                            Magic = 70,
+                            Endurance = 90,
+                            Speed = 85
+                        }
+                    };
+                    context.Builds.Add(buildGoku);
+                    await context.SaveChangesAsync();
+                    if (luvas != null)
+                        context.BuildWeapons.Add(new BuildWeapon { BuildId = buildGoku.Id, WeaponId = luvas.Id, SlotPosition = 1 });
+                    if (brinco != null)
+                        context.BuildAccessories.Add(new BuildAccessory { BuildId = buildGoku.Id, AccessoryId = brinco.Id, SlotPosition = 1 });
+                    // Build 2: Ichigo Bankai Crítico
+                    var buildIchigo = new Build
                     {
-                        context.Personagens.Remove(existing[i]);
-                    }
+                        Title = "Ichigo Hollow Bankai - Hiper Velocidade",
+                        Description = "<p>Build desenhada para <em>velocidade extrema</em> e esquiva com cortes críticos de Zangetsu. Requer bom timing para não esgotar a estamina.</p>",
+                        Level = 75,
+                        CharacterId = ichigo.Id,
+                        UtilizadorID = adminUser.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(-12),
+                        UpdatedAt = DateTime.UtcNow.AddHours(-12),
+                        Stats = new Estatisticas
+                        {
+                            Hp = 950,
+                            Strength = 90,
+                            Defense = 65,
+                            Magic = 80,
+                            Endurance = 70,
+                            Speed = 100
+                        }
+                    };
+                    context.Builds.Add(buildIchigo);
+                    await context.SaveChangesAsync();
+                    if (espada != null)
+                        context.BuildWeapons.Add(new BuildWeapon { BuildId = buildIchigo.Id, WeaponId = espada.Id, SlotPosition = 1 });
+                    if (mascara != null)
+                        context.BuildAccessories.Add(new BuildAccessory { BuildId = buildIchigo.Id, AccessoryId = mascara.Id, SlotPosition = 1 });
+                    // Adicionar um comentário de exemplo na Build do Goku
+                    context.Comentarios.Add(new Comment
+                    {
+                        BuildId = buildGoku.Id,
+                        UserId = adminUser.Id,
+                        Content = "Grande build! Troquei um dos acessórios por defesa mágica e ajudou imenso contra bosses de feitiçaria.",
+                        CreatedAt = DateTime.UtcNow.AddDays(-1)
+                    });
+                    await context.SaveChangesAsync();
                 }
             }
-            else
-            {
-                await context.Personagens.AddRangeAsync(targetCharacters);
-            }
-
-            await context.SaveChangesAsync();
         }
     }
-    
+
 }
