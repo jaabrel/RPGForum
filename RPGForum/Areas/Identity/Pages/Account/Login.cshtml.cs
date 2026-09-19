@@ -21,11 +21,13 @@ namespace RPGForum.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<Utilizadores> _signInManager;
+        private readonly UserManager<Utilizadores> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<Utilizadores> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<Utilizadores> signInManager, UserManager<Utilizadores> userManager,ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -101,26 +103,31 @@ namespace RPGForum.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
+                var user = await _userManager.FindByEmailAsync(Input.Email) ?? await _userManager.FindByNameAsync(Input.Email);
+                if (user == null)
                 {
-                    _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, "Credenciais inválidas.");
                     return Page();
                 }
+
+                if (!user.EmailConfirmed)
+                {
+                    // Gera um novo código e reencaminha para a página de confirmação
+                    var code = await _userManager.GenerateUserTokenAsync(user, "Email", "ConfirmEmail");
+                    await _emailSender.SendEmailAsync(user.Email, "Código de Validação - RPGForum",
+                        $"O teu código de ativação é: <strong>{code}</strong>");
+                    return RedirectToPage("ConfirmCode", new { email = user.Email, username = user.UserName, returnUrl = returnUrl });
+                }
+
+                var result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+                if (result.Succeeded)
+                {
+                    return LocalRedirect(returnUrl);
+                }
+
+                ModelState.AddModelError(string.Empty, "Palavra-passe incorreta.");
+                return Page();
             }
 
             // If we got this far, something failed, redisplay form

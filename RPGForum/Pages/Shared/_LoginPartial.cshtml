@@ -31,8 +31,10 @@
 <ul class="navbar-nav align-items-center">
 @if (SignInManager.IsSignedIn(User))
 {
+    var identityName = User.Identity?.Name;
+    var utilizador = await DbContext.Utilizadores.FirstOrDefaultAsync(u => u.UserName == identityName);
     <li class="nav-item me-3">
-        <a class="nav-link d-flex align-items-center gap-2 py-1" asp-area="Identity" asp-page="/Account/Manage/Index" title="Gerir Perfil">
+        <a class="nav-link d-flex align-items-center gap-2 py-1" asp-page="/Utilizadores/Details" asp-route-id="@utilizador?.Id" title="Ver Perfil">
             <span class="user-avatar-circle">@firstLetter</span>
             <span class="fw-semibold text-secondary">@displayUsername</span>
         </a>

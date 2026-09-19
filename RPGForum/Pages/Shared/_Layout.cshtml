@@ -26,27 +26,35 @@
                             <a class="nav-link" asp-area="" asp-page="/FeedForum">Fórum</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Sobre">Sobre</a>
+                            <a class="nav-link" asp-page="/Personagens/Index">Personagens</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Privacy">Privacidade</a>
+                            <a class="nav-link" asp-page="/Armas/Index">Armas</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Acessorios/Index">Acessórios</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Sobre">Sobre</a>
+                        </li>
+
                         @if (User.Identity!.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-page="/Build/Index">As Minhas Builds</a>
-                            </li>
-                        }
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-page="/Build/Index">As minhas Builds</a>
+                                </li>
+                            }
                         @if (User.IsInRole("Administrator"))
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-warning" href="#"
-                                   role="button" data-bs-toggle="dropdown">Administração</a>
+                                <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">
+                                    Administração
+                                </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-page="/Admin/Utilizadores/Index">Utilizadores</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Personagens/Index">Personagens</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Armas/Index">Armas</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Acessorios/Index">Acessórios</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Utilizadores/Index">Gerir Utilizadores</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Personagens/Index">Gerir Personagens</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Armas/Index">Gerir Armas</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Acessorios/Index">Gerir Acessórios</a></li>
                                 </ul>
                             </li>
                         }
@@ -78,7 +86,7 @@
                 .withUrl("/commentsHub")
                 .build();
         
-        hubConnection.on("ReceiveNotification", function (mensagem)) {
+        hubConnection.on("ReceiveNotification", function (mensagem) {
             alert("Alerta Fórum: " + mensagem);
         });
 

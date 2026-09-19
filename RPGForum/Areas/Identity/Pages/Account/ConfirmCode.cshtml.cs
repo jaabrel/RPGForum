@@ -86,31 +86,16 @@ namespace RPGForum.Areas.Identity.Pages.Account
 
             if (result.Succeeded)
             {
-                // Criar o registo na tabela Utilizadores agora que a conta está confirmada
-                var exists = await _context.Utilizadores.AnyAsync(u => u.Email == Input.Email);
-                if (!exists)
-                {
-                    var utilizador = new Utilizadores
-                    {
-                        UserName = Input.Username,
-                        Email = Input.Email,
-                        Role = "Registered",
-                        CreatedAt = DateTime.UtcNow,
-                    };
-
-                    _context.Utilizadores.Add(utilizador);
-                    await _context.SaveChangesAsync();
-                }
-
+                // 3. Inicia sessão automaticamente e entra no site
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return LocalRedirect(returnUrl);
             }
-
+            
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
-
+            
             return Page();
         }
     }

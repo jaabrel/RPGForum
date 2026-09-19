@@ -27,13 +27,15 @@ builder.Services.AddDefaultIdentity<Utilizadores>(options => options.SignIn.Requ
 
 builder.Services.AddRazorPages();
 
+builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "RPGForum API",
         Version = "v1",
-        Description = "Api para gestão dos Personagens, das Armas, das Builds e dos Acessórios com autenticação e permissões"
+        Description = "Api para gestão de Builds, Personagens, Armas e Acessórios."
     });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -52,7 +54,10 @@ builder.Services.AddSwaggerGen(c =>
 
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
 });
 
 builder.Services.AddControllers()
@@ -100,20 +105,22 @@ builder.Services.AddAuthentication(options => { })
         };
     });
 
-builder.Services.AddScoped<TokenService>();
-
-builder.Services.AddControllers()
-    .AddJsonOptions(options => 
-        options.JsonSerializerOptions.ReferenceHandler=ReferenceHandler.IgnoreCycles
-        );
 
 builder.Services.AddScoped<TokenService>();
-
-builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSignalR();
 
 builder.Services.AddTransient<IEmailSender, RPGForum.Services.SmtpEmailSender>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -122,7 +129,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "RPGForum API v1");
+    });
 }
 else
 {
@@ -137,11 +147,11 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseCors("AllowAll");
+
 app.UseSession();
 
 app.UseAuthentication();
-
-app.UseSwagger();
 
 app.UseAuthorization();
 

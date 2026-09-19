@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using RPGForum.Models;
 using RPGForum.Data;
+using System.ComponentModel.DataAnnotations;
+using RPGForum.Models.DTOs;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -26,21 +26,28 @@ public class BuildsController : ControllerBase
     /// <returns></returns>
     // GET: api/Build
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Build>>> GetBuild()
+    public async Task<ActionResult<IEnumerable<Build>>> GetBuilds()
     {
-        return await _context.Builds.ToListAsync();
+        return await _context.Builds
+            .Include(b => b.CharClass)
+            .Include(b => b.User)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
     }
 
     /// <summary>
-    /// Get de uma Build específica.
+    /// Obtém os detalhes de uma build específica, incluindo personagem, armas e acessórios.
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
     // GET: api/Build/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Build>> GetBuild(int id)
     {
-        var build = await _context.Builds.FindAsync(id);
+        var build = await _context.Builds
+            .Include(b => b.CharClass)
+            .Include(b => b.User)
+            .Include(b => b.BuidWeapons).ThenInclude(bw => bw.Weapon)
+            .Include(b => b.BuidAccessories).ThenInclude(ba => ba.Accessory)
+            .FirstOrDefaultAsync(b => b.Id == id);
 
         if (build == null)
         {
@@ -50,61 +57,100 @@ public class BuildsController : ControllerBase
         return build;
     }
 
-    // PUT: api/Build/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
+
+    /// <summary>
+    /// Atualiza uma build existente (Apenas o Criador ou Administrador).
+    /// </summary>
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> PutBuild(int? id, Build build)
+    public async Task<IActionResult> PutBuild(int id, [FromBody] BuildDto dto)
     {
-        if (id != build.Id)
+        if (!ModelState.IsValid)
         {
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
-        _context.Entry(build).State = EntityState.Modified;
-
-        try
+        var utilizador = await _userManager.GetUserAsync(User);
+        if (utilizador == null)
         {
-            await _context.SaveChangesAsync();
+            return Unauthorized(new { message = "Utilizador não autenticado." });
         }
-        catch (DbUpdateConcurrencyException)
+
+        var build = await _context.Builds
+                .Include(b => b.BuidWeapons)
+                .Include(b => b.BuildAccessories)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+        if (build == null)
         {
-            if (!BuildExists(id))
+            return NotFound(new { message = "Build não encontrada." });
+        }
+
+        var isAdmin = User.IsInRole("Administrator");
+        if (build.UtilizadorID != utilizador.Id && !isAdmin)
+        {
+            return Forbid();
+        }
+
+        if (!await _context.Personagens.AnyAsync(p => p.Id == dto.CharacterId))
+        {
+            return BadRequest(new { message = "A personagem especificada não existe." });
+        }
+
+        build.Title = dto.Title;
+        build.Description = dto.Description;
+        build.Level = dto.Level;
+        build.CharacterId = dto.CharacterId;
+        build.UpdatedAt = DateTime.UtcNow;
+
+        _context.BuildWeapons.RemoveRange(build.BuidWeapons);
+        foreach (var wId in dto.WeaponsIds.Distinct())
+        {
+            if (await _context.Armas.AnyAsync(a => a.Id == wId))
             {
-                return NotFound();
-            }
-            else
-            {
-                throw;
+                _context.BuildWeapons.Add(new BuildWeapon { BuildId = id, WeaponId = wId });
             }
         }
 
+        _context.BuildAccessories.RemoveRange(build.BuildAccessories);
+        int slot = 1;
+        foreach (var aId in dto.AccessoryIds.Distinct())
+        {
+            if (await _context.Acessorios.AnyAsync(a => a.Id == aId))
+            {
+                _context.BuildAccessories.Add(new BuildAccessory { BuildId = id, AccessoryId = aId, SlotPosition = slot++ });
+            }
+        }
+
+        await _context.SaveChangesAsync();
         return NoContent();
     }
 
-    public class BuildCreateDto
-    {
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public int Level { get; set; }
-        public int CharacterId { get; set; }
-        public List<int> WeaponsIds { get; set; } = new List<int>();
-        public List<int> AccessoryIds { get; set; } = new List<int>();
-    }
 
     /// <summary>
-    /// Criar uma Build.
+    /// Cria uma nova build associando personagem, armas e acessórios.
     /// </summary>
-    /// <param name="build"></param>
-    /// <returns></returns>
-    // POST: api/Build
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    // POST: api/Builds
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<Build>> PostBuild(BuildCreateDto dto)
+    public async Task<ActionResult<Build>> PostBuild([FromBody] BuildDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var utilizador = await _userManager.GetUserAsync(User);
-        if (utilizador == null) return Unauthorized();
+        if (utilizador == null)
+        {
+            return Unauthorized(new { message = "Utilizador não autenticado." });
+        }
+
+        if (!await _context.Personagens.AnyAsync(p => p.Id == dto.CharacterId))
+        {
+            return BadRequest(new { message = "A personagem especificada não existe." });
+        }
 
         var build = new Build
         {
@@ -113,24 +159,28 @@ public class BuildsController : ControllerBase
             Level = dto.Level,
             CharacterId = dto.CharacterId,
             UtilizadorID = utilizador.Id,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         _context.Builds.Add(build);
         await _context.SaveChangesAsync();
 
-        foreach (var wId in dto.WeaponsIds)
+        foreach (var wId in dto.WeaponsIds.Distinct())
         {
-            _context.BuildWeapons.Add(new BuildWeapon
+            if (await _context.Armas.AnyAsync(a => a.Id == wId))
             {
-                BuildId = build.Id,
-                WeaponId = wId
-            });
+                _context.BuildWeapons.Add(new BuildWeapon { BuildId = build.Id, WeaponId = wId });
+            }
         }
 
-        foreach (var aId in dto.AccessoryIds)
+        int slot = 1;
+        foreach (var aId in dto.AccessoryIds.Distinct())
         {
-            _context.BuildAccessories.Add(new BuildAccessory { BuildId = build.Id, AccessoryId = aId });
+            if (await _context.Acessorios.AnyAsync(a => a.Id == aId))
+            {
+                _context.BuildAccessories.Add(new BuildAccessory { BuildId = build.Id, AccessoryId = aId, SlotPosition = slot++ });
+            }
         }
 
         await _context.SaveChangesAsync();
@@ -138,31 +188,29 @@ public class BuildsController : ControllerBase
     }
 
     /// <summary>
-    /// Eliminar uma build (requer Autenticação e/ou Autorização de Administrador).
+    /// Elimina uma build (Apenas o Criador ou Administrador).
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    // DELETE: api/Build/5
+    // DELETE: api/Builds/5
     [HttpDelete("{id}")]
     [Authorize]
-    public async Task<IActionResult> DeleteBuild(int? id)
+    public async Task<IActionResult> DeleteBuild(int id)
     {
         var utilizador = await _userManager.GetUserAsync(User);
-
+        
         if (utilizador == null)
         {
-            return Unauthorized(new { message = "Utilizador não registado ou sem permissões" });
+            return Unauthorized(new { message = "Utilizador não autenticado." });
         }
-
+        
         var build = await _context.Builds.FindAsync(id);
+        
         if (build == null)
         {
             return NotFound(new { message = "Build não encontrada" });
         }
 
         var isAdmin = User.IsInRole("Administrator");
-
-        if (build.UtilizadorID != utilizador.Id && !isAdmin) 
+        if (build.UtilizadorID != utilizador.Id && !isAdmin)
         {
             return Forbid();
         }
@@ -173,8 +221,21 @@ public class BuildsController : ControllerBase
         return NoContent();
     }
 
-    private bool BuildExists(int? id)
+    /// <summary>
+    /// Objeto padrão para a entrada de dados da Build via a API (Create e Update).
+    /// </summary>
+    public class BuildDto
     {
-        return _context.Builds.Any(e => e.Id == id);
+        [Required(ErrorMessage = "O título é obrigatório.")]
+        [MaxLength(50)]
+        public string Title { get; set; } = string.Empty;
+        [MaxLength(2500)]
+        public string? Description { get; set; }
+        [Range(1, 100)]
+        public int Level { get; set; } = 1;
+        [Required]
+        public int CharacterId { get; set; }
+        public List<int> WeaponsIds { get; set; } = new();
+        public List<int> AccessoryIds { get; set; } = new();
     }
 }

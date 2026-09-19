@@ -1,0 +1,79 @@
+@page "{id:int}"
+@model RPGForum.Pages.Acessorios.DetailsModel
+@{
+    ViewData["Title"] = "Detalhes do Acessório";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="glass-card p-5">
+            <div class="mb-4 text-center">
+                <h2 class="title fw-black">@Model.Acessorio.Name</h2>
+                <span class="badge bg-secondary mb-2 fs-6">@Model.Acessorio.Type</span>
+                <p class="text-muted">Detalhes do Acessório Registado</p>
+            </div>
+
+            <!-- Details List -->
+            <div class="mb-4">
+                <h5 class="fw-bold border-bottom pb-2 mb-3">Informações</h5>
+                <dl class="row">
+                    <dt class="col-sm-4 text-muted">ID</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.Acessorio.Id</dd>
+
+                    <dt class="col-sm-4 text-muted">Nome</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.Acessorio.Name</dd>
+
+                    <dt class="col-sm-4 text-muted">Tipo de Acessório</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-secondary">@Model.Acessorio.Type</span>
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="fw-bold border-bottom pb-2 mb-3">Descrição do Acessório</h5>
+                <div class="p-3 bg-light rounded border text-muted" style="white-space: pre-line">
+                    @if (string.IsNullOrEmpty(Model.Acessorio.Description))
+                    {
+                        <span>Sem descrição associada a este acessório.</span>
+                    }
+                    else
+                    {
+                        @Model.Acessorio.Description
+                    }
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="fw-bold border-bottom pb-2 mb-3">📈 Bónus de Estatísticas</h5>
+                <div class="p-3 bg-light rounded border">
+                    @if (string.IsNullOrEmpty(Model.Acessorio.StatAfetada) || string.IsNullOrEmpty(Model.Acessorio.StatBonus))
+                    {
+                        <span class="text-muted small">Este acessório não fornece bónus de atributos.</span>
+                    }
+                    else
+                    {
+                        var stats = Model.Acessorio.StatAfetada.Split(',');
+                        var bonuses = Model.Acessorio.StatBonus.Split(',');
+                        <ul class="list-unstyled mb-0">
+                            @for (int i = 0; i < Math.Min(stats.Length, bonuses.Length); i++)
+                            {
+                                <li>
+                                    <span class="badge @(int.Parse(bonuses[i]) > 0 ? "bg-success" : "bg-danger") me-2">@((int.Parse(bonuses[i]) > 0 ? "+" : ""))@bonuses[i]</span>
+                                    <strong>@stats[i]</strong>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 pt-3 border-top">
+                <a asp-page="./Edit" asp-route-id="@Model.Acessorio.Id" class="btn btn-primary flex-grow-1">Editar Acessório</a>
+                <a asp-page="./Delete" asp-route-id="@Model.Acessorio.Id" class="btn btn-outline-danger">Eliminar</a>
+                <a asp-page="./Index" class="btn btn-outline-secondary">Voltar</a>
+            </div>
+        </div>
+    </div>
+</div>
